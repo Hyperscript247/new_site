@@ -3,6 +3,7 @@
 import type React from "react"
 import { useRef, useState } from "react"
 import { motion, useInView } from "framer-motion"
+import emailjs from "@emailjs/browser"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -10,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 
 export default function ContactForm() {
   const ref = useRef(null)
+  const formRef = useRef<HTMLFormElement>(null)
   const isInView = useInView(ref, { once: true, amount: 0.3 })
   const [formState, setFormState] = useState({
     name: "",
@@ -19,27 +21,46 @@ export default function ContactForm() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState<'success' | 'error' | null>(null)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setFormState((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsSubmitting(true)
+    setSubmitStatus(null)
 
-    // Simulate form submission
-    setTimeout(() => {
-      setIsSubmitting(false)
-      setIsSubmitted(true)
-      setFormState({
-        name: "",
-        email: "",
-        subject: "",
-        message: "",
-      })
-    }, 1500)
+    emailjs
+      .sendForm(
+        "service_f58sgyf",
+        "template_pv2id5n",
+        e.currentTarget,
+        {
+          publicKey: "0uyq2X_-JcvzHkeFc",
+        }
+      )
+      .then(
+        (result) => {
+          console.log("Email sent successfully:", result.text)
+          setIsSubmitting(false)
+          setIsSubmitted(true)
+          setSubmitStatus('success')
+          setFormState({
+            name: "",
+            email: "",
+            subject: "",
+            message: "",
+          })
+        },
+        (error) => {
+          console.error("Email sending failed:", error.text)
+          setIsSubmitting(false)
+          setSubmitStatus('error')
+        }
+      )
   }
 
   return (
@@ -114,12 +135,40 @@ export default function ContactForm() {
                     <p className="text-center text-muted-foreground">
                       Thank you for contacting us. We'll get back to you shortly.
                     </p>
-                    <Button onClick={() => setIsSubmitted(false)} variant="outline" className="mt-4">
+                    <Button onClick={() => {
+                      setIsSubmitted(false)
+                      setSubmitStatus(null)
+                    }} variant="outline" className="mt-4">
                       Send Another Message
                     </Button>
                   </div>
                 ) : (
-                  <form onSubmit={handleSubmit} className="space-y-4">
+                  <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
+                    {submitStatus === 'error' && (
+                      <div className="p-4 rounded-md bg-destructive/10 border border-destructive/20">
+                        <div className="flex items-center space-x-2">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="text-destructive"
+                          >
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="15" y1="9" x2="9" y2="15"/>
+                            <line x1="9" y1="9" x2="15" y2="15"/>
+                          </svg>
+                          <p className="text-sm text-destructive">
+                            Failed to send message. Please try again or contact us directly.
+                          </p>
+                        </div>
+                      </div>
+                    )}
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <div className="space-y-2">
                         <Label htmlFor="name">Name</Label>
