@@ -11,11 +11,11 @@ const navigation = {
     { name: "Contact Us", href: "/contact" },
   ],
   social: [
-    { name: "LinkedIn", icon: Linkedin, href: "#" },
-    { name: "Twitter", icon: Twitter, href: "#" },
-    { name: "Facebook", icon: Facebook, href: "#" },
-    { name: "Instagram", icon: Instagram, href: "#" },
-    { name: "YouTube", icon: Youtube, href: "#" },
+    { name: "LinkedIn", icon: Linkedin, href: "https://linkedin.com/company/hyperscripthub" },
+    { name: "Twitter", icon: Twitter, href: "https://twitter.com/hyperscripthub" },
+    { name: "Facebook", icon: Facebook, href: "https://facebook.com/hyperscripthub" },
+    { name: "Instagram", icon: Instagram, href: "https://instagram.com/hyperscripthub" },
+    { name: "YouTube", icon: Youtube, href: "https://youtube.com/@hyperscripthub" },
   ],
 }
 
@@ -60,10 +60,16 @@ export default function Footer() {
                   <li className="text-sm text-muted-foreground font-light">No 9C Afolabi Lesi Street, Town Planning, Lagos.</li>
                   <li>
                     <a
-                        href="mailto:soetanbolaji@gmail.com"
+                        href="mailto:info@hyperscript.ng"
                         className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                     >
-                      soetanbolaji@gmail.com
+                      info@hyperscript.ng
+                    </a>
+                    <a
+                        href="mailto:hyperscript247@gmail.com"
+                        className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      hyperscript247@gmail.com
                     </a>
                   </li>
                   <li>

@@ -57,9 +57,14 @@ export default function ContactInfo() {
               <Mail className="h-6 w-6" />
             </div>
             <h3 className="text-xl font-bold mb-2">Email Us</h3>
-            <a href="mailto:soetanbolaji@gmail.com" className="text-muted-foreground hover:text-primary">
-              soetanbolaji@gmail.com
-            </a>
+            <div className="space-y-1">
+              <a href="mailto:info@hyperscript.ng" className="block text-muted-foreground hover:text-primary">
+                info@hyperscript.ng
+              </a>
+              <a href="mailto:hyperscript247@gmail.com" className="block text-muted-foreground hover:text-primary">
+                hyperscript247@gmail.com
+              </a>
+            </div>
           </motion.div>
 
           <motion.div
@@ -87,17 +92,19 @@ export default function ContactInfo() {
           <h3 className="text-xl font-bold mb-4">Follow Us</h3>
           <div className="flex justify-center space-x-4">
             {[
-              { icon: Linkedin, label: "LinkedIn" },
-              { icon: Twitter, label: "Twitter" },
-              { icon: Facebook, label: "Facebook" },
-              { icon: Instagram, label: "Instagram" },
-              { icon: Youtube, label: "YouTube" },
+              { name: "LinkedIn", icon: Linkedin, href: "https://linkedin.com/company/hyperscripthub" },
+              { name: "Twitter", icon: Twitter, href: "https://twitter.com/hyperscripthub" },
+              { name: "Facebook", icon: Facebook, href: "https://facebook.com/hyperscripthub" },
+              { name: "Instagram", icon: Instagram, href: "https://instagram.com/hyperscripthub" },
+              { name: "YouTube", icon: Youtube, href: "https://youtube.com/@hyperscripthub" },
             ].map((social) => (
               <a
-                key={social.label}
-                href="#"
+                key={social.name}
+                href={social.href}
                 className="rounded-full bg-primary/10 p-3 text-muted-foreground hover:bg-primary/20 hover:text-primary-foreground transition-colors"
-                aria-label={social.label}
+                aria-label={social.name}
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <social.icon className="h-5 w-5" />
               </a>
