@@ -64,7 +64,7 @@ export default function Footer() {
                         className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                     >
                       info@hyperscript.ng
-                    </a>
+                    </a><br/>
                     <a
                         href="mailto:hyperscript247@gmail.com"
                         className="text-sm text-muted-foreground hover:text-foreground transition-colors"
