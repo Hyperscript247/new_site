@@ -35,9 +35,9 @@ export default function ContactForm() {
 
     emailjs
       .sendForm(
-        "service_f58sgyf",
-        "template_pv2id5n",
-        e.currentTarget,
+        "service_f58sgyf", 
+        "template_pv2id5n", 
+        e.currentTarget, 
         {
           publicKey: "0uyq2X_-JcvzHkeFc",
         }
