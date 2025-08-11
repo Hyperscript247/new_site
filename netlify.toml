@@ -6,5 +6,5 @@
   ]
 
 [build]
-  command = "npm run build"
+  command = "prisma generate && prisma migrate deploy && next build"
   publish = ".next"
