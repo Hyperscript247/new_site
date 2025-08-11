@@ -11,7 +11,7 @@ export default function ContactInfo() {
   return (
     <section
       ref={ref}
-      className="w-full py-12 md:py-24 lg:py-32 bg-background dark:bg-gradient-to-b dark:from-gray-900 dark:via-purple-950 dark:to-gray-900 text-foreground"
+      className="w-full py-32 md:py-40 lg:py-32 bg-background dark:bg-gradient-to-b dark:from-gray-900 dark:via-purple-950 dark:to-gray-900 text-foreground"
     >
       <div className="container px-4 md:px-6">
         <div className="flex flex-col items-center justify-center space-y-4 text-center">
