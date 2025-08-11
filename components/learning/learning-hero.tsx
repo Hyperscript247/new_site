@@ -2,7 +2,7 @@ import { Suspense } from "react"
 
 export default function LearningHero() {
   return (
-    <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-950/30 dark:to-purple-900/30">
+    <section className="w-full py-32 md:py-40 lg:py-32 bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-950/30 dark:to-purple-900/30">
       <div className="container px-4 md:px-6">
         <div className="flex flex-col items-center space-y-4 text-center">
           <div className="space-y-2">
