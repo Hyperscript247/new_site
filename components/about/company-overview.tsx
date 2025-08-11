@@ -55,67 +55,67 @@ export default function CompanyOverview() {
           </motion.div>
         </div>
 
-        <div className="mt-24">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="text-3xl font-light tracking-tighter text-center mb-16"
-          >
-            Our Journey
-          </motion.h2>
-          <div className="relative">
-            {/* Timeline line */}
-            <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-0.5 bg-gradient-to-b from-primary via-primary to-transparent" />
+        {/*<div className="mt-24">*/}
+        {/*  <motion.h2*/}
+        {/*    initial={{ opacity: 0, y: 20 }}*/}
+        {/*    animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}*/}
+        {/*    transition={{ duration: 0.5, delay: 0.3 }}*/}
+        {/*    className="text-3xl font-light tracking-tighter text-center mb-16"*/}
+        {/*  >*/}
+        {/*    Our Journey*/}
+        {/*  </motion.h2>*/}
+        {/*  <div className="relative">*/}
+        {/*    /!* Timeline line *!/*/}
+        {/*    <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-0.5 bg-gradient-to-b from-primary via-primary to-transparent" />*/}
 
-            {/* Timeline items */}
-            {[
-              {
-                year: "2018",
-                title: "Foundation",
-                description:
-                  "Hyperscript Technologies was founded with a vision to transform businesses through technology.",
-              },
-              {
-                year: "2020",
-                title: "Expansion",
-                description:
-                  "Expanded our service offerings to include comprehensive data analytics and software engineering solutions.",
-              },
-              {
-                year: "2022",
-                title: "Growth",
-                description:
-                  "Established training programs and talent outsourcing services to meet growing client demands.",
-              },
-              {
-                year: "2023",
-                title: "Innovation",
-                description:
-                  "Launched innovative AI-powered solutions to help businesses leverage advanced technologies.",
-              },
-            ].map((item, i) => (
-              <motion.div
-                key={item.year}
-                initial={{ opacity: 0, y: 20 }}
-                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                transition={{ duration: 0.5, delay: 0.4 + i * 0.1 }}
-                className={`relative flex items-center justify-between mb-16 ${
-                  i % 2 === 0 ? "flex-row" : "flex-row-reverse"
-                }`}
-              >
-                <div className={`w-5/12 ${i % 2 === 0 ? "text-right pr-8" : "text-left pl-8"}`}>
-                  <h3 className="text-xl font-medium">{item.title}</h3>
-                  <p className="text-muted-foreground font-light">{item.description}</p>
-                </div>
-                <div className="absolute left-1/2 transform -translate-x-1/2 w-10 h-10 rounded-full bg-primary flex items-center justify-center">
-                  <span className="font-medium text-xs">{item.year}</span>
-                </div>
-                <div className="w-5/12" />
-              </motion.div>
-            ))}
-          </div>
-        </div>
+        {/*    /!* Timeline items *!/*/}
+        {/*    {[*/}
+        {/*      // {*/}
+        {/*      //   year: "2018",*/}
+        {/*      //   title: "Foundation",*/}
+        {/*      //   description:*/}
+        {/*      //     "Hyperscript Technologies was founded with a vision to transform businesses through technology.",*/}
+        {/*      // },*/}
+        {/*      // {*/}
+        {/*      //   year: "2020",*/}
+        {/*      //   title: "Expansion",*/}
+        {/*      //   description:*/}
+        {/*      //     "Expanded our service offerings to include comprehensive data analytics and software engineering solutions.",*/}
+        {/*      // },*/}
+        {/*      // {*/}
+        {/*      //   year: "2022",*/}
+        {/*      //   title: "Growth",*/}
+        {/*      //   description:*/}
+        {/*      //     "Established training programs and talent outsourcing services to meet growing client demands.",*/}
+        {/*      // },*/}
+        {/*      {*/}
+        {/*        year: "2025",*/}
+        {/*        title: "Innovation",*/}
+        {/*        description:*/}
+        {/*          "Launched innovative AI-powered solutions to help businesses leverage advanced technologies.",*/}
+        {/*      },*/}
+        {/*    ].map((item, i) => (*/}
+        {/*      <motion.div*/}
+        {/*        key={item.year}*/}
+        {/*        initial={{ opacity: 0, y: 20 }}*/}
+        {/*        animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}*/}
+        {/*        transition={{ duration: 0.5, delay: 0.4 + i * 0.1 }}*/}
+        {/*        className={`relative flex items-center justify-between mb-16 ${*/}
+        {/*          i % 2 === 0 ? "flex-row" : "flex-row-reverse"*/}
+        {/*        }`}*/}
+        {/*      >*/}
+        {/*        <div className={`w-5/12 ${i % 2 === 0 ? "text-right pr-8" : "text-left pl-8"}`}>*/}
+        {/*          <h3 className="text-xl font-medium">{item.title}</h3>*/}
+        {/*          <p className="text-muted-foreground font-light">{item.description}</p>*/}
+        {/*        </div>*/}
+        {/*        <div className="absolute left-1/2 transform -translate-x-1/2 w-10 h-10 rounded-full bg-primary flex items-center justify-center">*/}
+        {/*          <span className="font-medium text-xs">{item.year}</span>*/}
+        {/*        </div>*/}
+        {/*        <div className="w-5/12" />*/}
+        {/*      </motion.div>*/}
+        {/*    ))}*/}
+        {/*  </div>*/}
+        {/*</div>*/}
       </div>
     </section>
   )
