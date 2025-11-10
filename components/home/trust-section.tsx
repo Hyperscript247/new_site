@@ -10,6 +10,30 @@ export default function TrustSection() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, amount: 0.3 })
 
+  const testimonials = [
+    {
+      name: "Chinedu Okafor",
+      position: "CEO, TechVision Nigeria",
+      image: "/placeholder.svg?height=40&width=40",
+      review: "Hyperscript Technologies delivered exceptional software solutions that streamlined our operations. Their professionalism and technical expertise are unmatched in the Nigerian tech space.",
+      rating: 5
+    },
+    {
+      name: "Amina Bello",
+      position: "Managing Director, DataFlow Systems",
+      image: "/placeholder.svg?height=40&width=40",
+      review: "Working with Hyperscript was a game-changer for our organization. Their data analytics solutions provided insights that drove our revenue up by 45%. Highly recommended!",
+      rating: 5
+    },
+    {
+      name: "Oluwaseun Adeyemi",
+      position: "HR Director, Enterprise Solutions Ltd",
+      image: "/placeholder.svg?height=40&width=40",
+      review: "The HR management system they developed for us transformed how we handle employee data and recruitment. Their training programs also upskilled our entire IT team remarkably.",
+      rating: 5
+    }
+  ]
+
   return (
     <section ref={ref} className="w-full py-24 md:py-32 bg-background">
       <div className="container px-6 mx-auto">
@@ -34,9 +58,9 @@ export default function TrustSection() {
         </div>
 
         <div className="mt-16 grid gap-8 md:grid-cols-3">
-          {[1, 2, 3].map((i) => (
+          {testimonials.map((testimonial, i) => (
             <motion.div
-              key={i}
+              key={testimonial.name}
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
               transition={{ duration: 0.5, delay: 0.1 * i }}
@@ -46,27 +70,26 @@ export default function TrustSection() {
                 <div className="flex items-center space-x-4">
                   <div className="rounded-full bg-muted p-2">
                     <Image
-                      src={`/placeholder.svg?height=40&width=40`}
-                      alt={`Client ${i}`}
+                      src={testimonial.image}
+                      alt={testimonial.name}
                       width={40}
                       height={40}
                       className="rounded-full"
                     />
                   </div>
                   <div>
-                    <h3 className="font-medium">Client {i}</h3>
-                    <p className="text-sm text-muted-foreground">Industry Leader</p>
+                    <h3 className="font-medium">{testimonial.name}</h3>
+                    <p className="text-sm text-muted-foreground">{testimonial.position}</p>
                   </div>
                 </div>
                 <blockquote className="text-sm text-muted-foreground font-light">
-                  "Hyperscript Technologies transformed our business operations with their innovative solutions. Their
-                  team's expertise and dedication exceeded our expectations."
+                  "{testimonial.review}"
                 </blockquote>
                 <div className="flex items-center space-x-1">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <svg
                       key={star}
-                      className="h-4 w-4 fill-primary"
+                      className={`h-4 w-4 ${star <= testimonial.rating ? 'fill-primary' : 'fill-muted'}`}
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 24 24"
                     >
