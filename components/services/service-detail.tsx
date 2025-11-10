@@ -38,7 +38,7 @@ export default function ServiceDetail({
     <section
       ref={ref}
       id={id}
-      className={`w-full py-24 md:py-32 ${imagePosition === "right" ? "bg-background" : "bg-muted/30 dark:animated-gradient"}`}
+      className={`w-full pt-16 pb-24 md:pt-20 md:pb-32 ${imagePosition === "right" ? "bg-background" : "bg-muted/30 dark:animated-gradient"}`}
     >
       <div className="container px-6 mx-auto">
         <div

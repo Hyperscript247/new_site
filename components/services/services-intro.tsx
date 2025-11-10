@@ -2,14 +2,14 @@
 
 import { useRef } from "react"
 import { motion, useInView } from "framer-motion"
-import { BarChart3, Code, BookOpen, Users } from "lucide-react"
+import { Code, Database, Megaphone, Camera, GraduationCap } from "lucide-react"
 
 export default function ServicesIntro() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, amount: 0.3 })
 
   return (
-    <section ref={ref} className="w-full py-32 md:py-40 bg-background text-foreground">
+    <section ref={ref} className="w-full pt-32 pb-16 md:pt-40 md:pb-20 bg-background text-foreground">
       <div className="container px-6 mx-auto">
         <div className="flex flex-col items-center justify-center space-y-4 text-center">
           <motion.div
@@ -23,37 +23,43 @@ export default function ServicesIntro() {
               Comprehensive Solutions for Your Business
             </h1>
             <p className="mx-auto max-w-[700px] text-muted-foreground text-lg font-light">
-              Our tailored solutions meet your business challenges head-on – from advanced data management to bespoke
-              software engineering.
+              From software development to data analytics, digital marketing to media production, and training to outsourcing –
+              we deliver end-to-end solutions that drive your business forward.
             </p>
           </motion.div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-16">
           {[
             {
-              icon: BarChart3,
-              title: "Data Analytics",
-              description: "Transform raw data into actionable insights",
-              link: "#data-analytics",
-            },
-            {
               icon: Code,
-              title: "Software Engineering",
-              description: "Custom solutions for your unique needs",
-              link: "#software-engineering",
+              title: "Software Development",
+              description: "Full-stack development, DevOps, and cloud solutions",
+              link: "#software-development",
             },
             {
-              icon: BookOpen,
-              title: "Training",
-              description: "Empower your team with new skills",
-              link: "#training",
+              icon: Database,
+              title: "Data & AI Solutions",
+              description: "Analytics, BI, data engineering, and AI integration",
+              link: "#data-ai-solutions",
             },
             {
-              icon: Users,
-              title: "Talent Solutions",
-              description: "Access skilled professionals on demand",
-              link: "#talent",
+              icon: Megaphone,
+              title: "Digital Marketing",
+              description: "Social media, SEO, content strategy, and analytics",
+              link: "#digital-marketing",
+            },
+            {
+              icon: Camera,
+              title: "Graphics & Media",
+              description: "Design, videography, photography, and animation",
+              link: "#graphics-media",
+            },
+            {
+              icon: GraduationCap,
+              title: "Training & Outsourcing",
+              description: "Tech training programs and talent outsourcing",
+              link: "#training-outsourcing",
             },
           ].map((service, i) => (
             <motion.a

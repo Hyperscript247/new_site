@@ -41,21 +41,21 @@ export default function VisionMission() {
                 <h3 className="text-2xl font-light">Our Vision</h3>
               </div>
               <p className="text-muted-foreground font-light">
-                To empower organizations with data-driven insights and innovative solutions, transforming businesses
-                into dynamic and efficient enterprises.
+                To be Africa's leading innovation hub, bridging the gap between technology, data, and digital creativity,
+                while building a global network of skilled professionals and scalable tech-driven solutions.
               </p>
               <ul className="space-y-4">
                 <li className="flex items-start space-x-3">
                   <div className="h-2 w-2 translate-y-1.5 rounded-full bg-primary" />
-                  <span className="text-muted-foreground font-light">Leading technological innovation</span>
+                  <span className="text-muted-foreground font-light">Leading Africa's innovation ecosystem</span>
                 </li>
                 <li className="flex items-start space-x-3">
                   <div className="h-2 w-2 translate-y-1.5 rounded-full bg-primary" />
-                  <span className="text-muted-foreground font-light">Creating sustainable business growth</span>
+                  <span className="text-muted-foreground font-light">Building global networks of skilled professionals</span>
                 </li>
                 <li className="flex items-start space-x-3">
                   <div className="h-2 w-2 translate-y-1.5 rounded-full bg-primary" />
-                  <span className="text-muted-foreground font-light">Building a data-driven future</span>
+                  <span className="text-muted-foreground font-light">Creating scalable tech-driven solutions</span>
                 </li>
               </ul>
             </div>
@@ -75,21 +75,22 @@ export default function VisionMission() {
                 <h3 className="text-2xl font-light">Our Mission</h3>
               </div>
               <p className="text-muted-foreground font-light">
-                To deliver cutting-edge data analytics, business intelligence, and corporate training solutions that
-                overcome complex challenges and nurture industry leaders.
+                To deliver cutting-edge technology, data, and digital transformation solutions that empower organizations
+                and individuals through innovation, intelligence, and creativity — enabling smarter decisions, stronger brands,
+                and sustainable growth.
               </p>
               <ul className="space-y-4">
                 <li className="flex items-start space-x-3">
                   <div className="h-2 w-2 translate-y-1.5 rounded-full bg-primary" />
-                  <span className="text-muted-foreground font-light">Providing exceptional client service</span>
+                  <span className="text-muted-foreground font-light">Enabling smarter decisions through intelligence</span>
                 </li>
                 <li className="flex items-start space-x-3">
                   <div className="h-2 w-2 translate-y-1.5 rounded-full bg-primary" />
-                  <span className="text-muted-foreground font-light">Developing innovative solutions</span>
+                  <span className="text-muted-foreground font-light">Building stronger brands through creativity</span>
                 </li>
                 <li className="flex items-start space-x-3">
                   <div className="h-2 w-2 translate-y-1.5 rounded-full bg-primary" />
-                  <span className="text-muted-foreground font-light">Fostering continuous learning</span>
+                  <span className="text-muted-foreground font-light">Driving sustainable growth through innovation</span>
                 </li>
               </ul>
             </div>

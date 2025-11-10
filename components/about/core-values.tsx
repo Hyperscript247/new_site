@@ -3,6 +3,8 @@
 import { useRef } from "react"
 import { motion, useInView } from "framer-motion"
 import { Lightbulb, Shield, Award, Users, Zap, BarChart } from "lucide-react"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
 
 const values = [
   {
@@ -86,10 +88,13 @@ export default function CoreValues() {
           className="mt-16 text-center"
         >
           <h3 className="text-xl font-medium mb-4">Join Our Team</h3>
-          <p className="mx-auto max-w-[700px] text-muted-foreground font-light">
+          <p className="mx-auto max-w-[700px] text-muted-foreground font-light mb-6">
             We're always looking for talented individuals who share our values and passion for innovation. If you're
             interested in joining our team, we'd love to hear from you.
           </p>
+          <Button asChild size="lg">
+            <Link href="/contact">Get in Touch</Link>
+          </Button>
         </motion.div>
       </div>
     </section>
