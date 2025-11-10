@@ -29,54 +29,75 @@ export default function ServicesIntro() {
           </motion.div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-16">
-          {[
-            {
-              icon: Code,
-              title: "Software Development",
-              description: "Full-stack development, DevOps, and cloud solutions",
-              link: "#software-development",
-            },
-            {
-              icon: Database,
-              title: "Data & AI Solutions",
-              description: "Analytics, BI, data engineering, and AI integration",
-              link: "#data-ai-solutions",
-            },
-            {
-              icon: Megaphone,
-              title: "Digital Marketing",
-              description: "Social media, SEO, content strategy, and analytics",
-              link: "#digital-marketing",
-            },
-            {
-              icon: Camera,
-              title: "Graphics & Media",
-              description: "Design, videography, photography, and animation",
-              link: "#graphics-media",
-            },
-            {
-              icon: GraduationCap,
-              title: "Training & Outsourcing",
-              description: "Tech training programs and talent outsourcing",
-              link: "#training-outsourcing",
-            },
-          ].map((service, i) => (
-            <motion.a
-              key={service.title}
-              href={service.link}
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-              transition={{ duration: 0.5, delay: 0.1 * i }}
-              className="glass-card p-6 flex flex-col items-center text-center hover:bg-primary/5 transition-colors"
-            >
-              <div className="rounded-full bg-primary/20 p-3 text-primary mb-4">
-                <service.icon className="h-6 w-6" />
-              </div>
-              <h3 className="text-xl font-medium mb-2">{service.title}</h3>
-                              <p className="text-muted-foreground font-light">{service.description}</p>
-            </motion.a>
-          ))}
+        <div className="mt-16 flex flex-col gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              {
+                icon: Code,
+                title: "Software Development",
+                description: "Full-stack development, DevOps, and cloud solutions",
+                link: "#software-development",
+              },
+              {
+                icon: Database,
+                title: "Data & AI Solutions",
+                description: "Analytics, BI, data engineering, and AI integration",
+                link: "#data-ai-solutions",
+              },
+              {
+                icon: Megaphone,
+                title: "Digital Marketing",
+                description: "Social media, SEO, content strategy, and analytics",
+                link: "#digital-marketing",
+              },
+            ].map((service, i) => (
+              <motion.a
+                key={service.title}
+                href={service.link}
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                transition={{ duration: 0.5, delay: 0.1 * i }}
+                className="glass-card p-6 flex flex-col items-center text-center hover:bg-primary/5 transition-colors"
+              >
+                <div className="rounded-full bg-primary/20 p-3 text-primary mb-4">
+                  <service.icon className="h-6 w-6" />
+                </div>
+                <h3 className="text-xl font-medium mb-2">{service.title}</h3>
+                <p className="text-muted-foreground font-light">{service.description}</p>
+              </motion.a>
+            ))}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto w-full">
+            {[
+              {
+                icon: Camera,
+                title: "Graphics & Media",
+                description: "Design, videography, photography, and animation",
+                link: "#graphics-media",
+              },
+              {
+                icon: GraduationCap,
+                title: "Training & Outsourcing",
+                description: "Tech training programs and talent outsourcing",
+                link: "#training-outsourcing",
+              },
+            ].map((service, i) => (
+              <motion.a
+                key={service.title}
+                href={service.link}
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                transition={{ duration: 0.5, delay: 0.1 * (i + 3) }}
+                className="glass-card p-6 flex flex-col items-center text-center hover:bg-primary/5 transition-colors"
+              >
+                <div className="rounded-full bg-primary/20 p-3 text-primary mb-4">
+                  <service.icon className="h-6 w-6" />
+                </div>
+                <h3 className="text-xl font-medium mb-2">{service.title}</h3>
+                <p className="text-muted-foreground font-light">{service.description}</p>
+              </motion.a>
+            ))}
+          </div>
         </div>
       </div>
     </section>

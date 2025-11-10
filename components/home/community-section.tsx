@@ -33,7 +33,7 @@ export default function CommunitySection() {
                 className="hidden sm:block"
               >
                 <div className="relative">
-                  <div className="absolute inset-0 bg-primary/30 rounded-full blur-2xl" />
+                  <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl" />
                   <div className="relative bg-gradient-to-br from-primary to-purple-500 p-4 rounded-full">
                     <Users className="h-12 w-12 text-white" />
                   </div>
@@ -49,7 +49,7 @@ export default function CommunitySection() {
                   className="sm:hidden mb-4 flex justify-center"
                 >
                   <div className="relative">
-                    <div className="absolute inset-0 bg-primary/30 rounded-full blur-2xl" />
+                    <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl" />
                     <div className="relative bg-gradient-to-br from-primary to-purple-500 p-4 rounded-full">
                       <Users className="h-10 w-10 text-white" />
                     </div>
@@ -97,7 +97,7 @@ export default function CommunitySection() {
               </Button>
 
               {/* Glow effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-primary to-purple-500 rounded-full blur-2xl opacity-30 -z-10 group-hover:opacity-50 transition-opacity duration-300" />
+              <div className="absolute inset-0 bg-gradient-to-r from-primary to-purple-500 rounded-full blur-lg opacity-20 -z-10 group-hover:opacity-30 transition-opacity duration-300" />
             </motion.div>
           </div>
         </motion.div>
