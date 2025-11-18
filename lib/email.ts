@@ -24,8 +24,9 @@ export async function sendCommunityWelcomeEmail({ to, name }: CommunityWelcomeEm
     }
 
     // Dynamically import Resend to avoid errors if not installed
-    let Resend;
+    let Resend: any;
     try {
+      // @ts-expect-error - resend package is optional and may not be installed
       const resendModule = await import('resend');
       Resend = resendModule.Resend;
     } catch (error) {
