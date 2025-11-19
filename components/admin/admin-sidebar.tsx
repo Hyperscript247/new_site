@@ -42,6 +42,7 @@ export default function AdminSidebar({ username }: { username: string }) {
           variant="outline"
           size="icon"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="bg-background shadow-md"
         >
           {isMobileMenuOpen ? (
             <X className="h-5 w-5" />
@@ -62,7 +63,7 @@ export default function AdminSidebar({ username }: { username: string }) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-40 h-full w-64 bg-card border-r transition-transform duration-200 ease-in-out",
+          "fixed left-0 top-0 z-40 h-full w-64 bg-card border-r transition-transform duration-200 ease-in-out lg:z-0",
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >

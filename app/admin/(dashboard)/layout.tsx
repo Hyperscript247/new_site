@@ -22,7 +22,7 @@ export default async function AdminLayout({
     <div className="min-h-screen bg-background">
       <AdminSidebar username={session.username} />
       <main className="lg:ml-64 min-h-screen">
-        <div className="p-6 lg:p-8">{children}</div>
+        <div className="pt-16 px-6 pb-6 lg:p-8">{children}</div>
       </main>
     </div>
   )
