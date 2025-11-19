@@ -17,7 +17,7 @@ async function main() {
     where: { username: 'admin' },
     update: {},
     create: {
-      id: 'admin-default',
+      // id will be auto-generated
       username: 'admin',
       password: adminPassword, // For production: use hashedPassword
       createdAt: new Date(),

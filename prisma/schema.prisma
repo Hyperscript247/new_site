@@ -35,11 +35,11 @@ model Registration {
 }
 
 model Admin {
-  id        String   @id
+  id        String   @id @default(cuid())
   username  String   @unique
   password  String
   createdAt DateTime @default(now())
-  updatedAt DateTime
+  updatedAt DateTime @updatedAt
 }
 
 model CommunityMember {
