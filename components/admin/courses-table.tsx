@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useRef } from "react"
+import { useRouter } from "next/navigation"
 import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -32,6 +33,7 @@ type Course = {
 }
 
 export default function CoursesTable({ courses }: { courses: Course[] }) {
+  const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [editingCourse, setEditingCourse] = useState<Course | null>(null)
@@ -50,6 +52,7 @@ export default function CoursesTable({ courses }: { courses: Course[] }) {
     if (result.success) {
       setIsCreateOpen(false)
       createFormRef.current?.reset()
+      router.refresh()
     } else {
       setError(result.error || "Failed to create course")
     }
@@ -69,6 +72,7 @@ export default function CoursesTable({ courses }: { courses: Course[] }) {
     if (result.success) {
       setEditingCourse(null)
       editFormRef.current?.reset()
+      router.refresh()
     } else {
       setError(result.error || "Failed to update course")
     }
@@ -78,7 +82,10 @@ export default function CoursesTable({ courses }: { courses: Course[] }) {
   const handleDelete = async (courseId: string) => {
     if (!confirm("Are you sure you want to delete this course? This will also delete all registrations.")) return
     setIsLoading(true)
-    await deleteCourse(courseId)
+    const result = await deleteCourse(courseId)
+    if (result.success) {
+      router.refresh()
+    }
     setIsLoading(false)
   }
 
