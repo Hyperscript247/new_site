@@ -23,17 +23,8 @@ export async function sendCommunityWelcomeEmail({ to, name }: CommunityWelcomeEm
       return { success: true, mode: 'development' };
     }
 
-    // Dynamically import Resend to avoid errors if not installed
-    let Resend: any;
-    try {
-      // @ts-expect-error - resend package is optional and may not be installed
-      const resendModule = await import('resend');
-      Resend = resendModule.Resend;
-    } catch (error) {
-      console.log('[EMAIL] Resend not installed. Please run: npm install resend');
-      console.log(`[EMAIL] Would send welcome email to: ${to} (${name})`);
-      return { success: true, mode: 'development' };
-    }
+    // Import Resend dynamically
+    const { Resend } = await import('resend')
 
     const resend = new Resend(resendApiKey);
 

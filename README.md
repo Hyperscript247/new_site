@@ -19,7 +19,8 @@ A modern Next.js website for Hyperscript Technologies, featuring services, learn
 - **UI Components**: shadcn/ui (Radix UI)
 - **Database**: PostgreSQL with Prisma ORM
 - **Animation**: Framer Motion
-- **Email**: Resend (optional for notifications)
+- **Email**: Resend for email notifications
+- **Authentication**: bcrypt for password hashing
 - **Deployment**: Netlify
 
 ## Getting Started
@@ -89,20 +90,15 @@ The `CommunityMember` model stores:
 
 To enable email notifications when users register:
 
-1. Install Resend:
-```bash
-npm install resend
-```
+1. Get a Resend API key from [resend.com](https://resend.com)
 
-2. Get a Resend API key from [resend.com](https://resend.com)
-
-3. Add to your `.env`:
+2. Add to your `.env`:
 ```
 RESEND_API_KEY="your_api_key_here"
 EMAIL_FROM="Hyperscript Community <onboarding@hyperscript.ng>"
 ```
 
-**Note**: If Resend is not configured, the application will still work. Email notifications will be logged to the console instead of being sent.
+**Note**: Resend is already installed as a dependency. If `RESEND_API_KEY` is not configured, email notifications will be logged to the console instead of being sent.
 
 ### Form Fields
 
