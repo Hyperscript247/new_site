@@ -2,6 +2,7 @@
 
 import { cookies } from 'next/headers'
 import { prisma } from '@/lib/prisma'
+import bcrypt from 'bcryptjs'
 
 const SESSION_COOKIE_NAME = 'admin_session'
 
@@ -11,7 +12,23 @@ export async function login(username: string, password: string) {
       where: { username },
     })
 
-    if (!admin || admin.password !== password) {
+    if (!admin) {
+      return { success: false, error: 'Invalid credentials' }
+    }
+
+    // Check if password is hashed (starts with $2a$ or $2b$ for bcrypt)
+    const isHashed = admin.password.startsWith('$2a$') || admin.password.startsWith('$2b$')
+
+    let passwordMatches = false
+    if (isHashed) {
+      // Use bcrypt to compare hashed password
+      passwordMatches = await bcrypt.compare(password, admin.password)
+    } else {
+      // Fallback to plain text comparison (for development/migration)
+      passwordMatches = admin.password === password
+    }
+
+    if (!passwordMatches) {
       return { success: false, error: 'Invalid credentials' }
     }
 
@@ -70,4 +87,12 @@ export async function requireAuth() {
     throw new Error('Unauthorized')
   }
   return session
+}
+
+export async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, 10)
+}
+
+export async function verifyPassword(password: string, hash: string): Promise<boolean> {
+  return bcrypt.compare(password, hash)
 }

@@ -133,6 +133,120 @@ The community registration form includes:
 - Agree to Terms of Engagement (required)
 - Agree to receive communications
 
+## Admin Dashboard
+
+The admin dashboard provides a comprehensive interface for managing community members, courses, and registrations.
+
+### Accessing the Admin Dashboard
+
+1. **Navigate to**: [http://localhost:3000/admin/login](http://localhost:3000/admin/login)
+2. **Default credentials** (after seeding):
+   - Username: `admin`
+   - Password: `admin123`
+
+**⚠️ IMPORTANT**: Change the default password immediately after first login!
+
+### Setting Up Admin Access
+
+#### Option 1: Seed the Database (Recommended for Development)
+
+Run the seed script to create a default admin user and sample courses:
+
+```bash
+npm run seed
+# or
+npx prisma db seed
+```
+
+This will create:
+- Default admin user (username: `admin`, password: `admin123`)
+- 3 sample courses (Web Development, Data Science, Cloud Computing)
+
+#### Option 2: Create Admin User Manually
+
+Using Prisma Studio:
+
+```bash
+npx prisma studio
+```
+
+Then create an admin record in the `Admin` table:
+- **id**: Any unique string (e.g., `admin-1`)
+- **username**: Your desired username
+- **password**: Your password (plain text for development, hashed for production)
+- **createdAt**: Current timestamp
+- **updatedAt**: Current timestamp
+
+#### Option 3: Hash Password for Production
+
+For production environments, use hashed passwords:
+
+```typescript
+import { hashPassword } from '@/lib/auth/session'
+
+const hashedPassword = await hashPassword('your-secure-password')
+// Use this hashed password in the database
+```
+
+### Admin Dashboard Features
+
+#### 1. Dashboard Overview (`/admin`)
+- **Statistics Cards**:
+  - Total community members with pending count
+  - Total active courses
+  - Total course registrations with pending count
+  - Pending actions requiring attention
+- **Recent Activity**:
+  - Latest 5 community member registrations
+  - Latest 5 course registrations
+  - Quick status overview
+
+#### 2. Community Members Management (`/admin/community`)
+- View all community member registrations in a data table
+- Update member status: Pending → Approved/Rejected
+- View detailed member profiles including:
+  - Personal information (name, email, phone, DOB, profession)
+  - Areas of interest and support seeking
+  - Volunteer preferences
+  - LinkedIn profile
+- Delete members with confirmation
+- Filter and search functionality
+
+#### 3. Courses Management (`/admin/courses`)
+- **Create**: Add new courses with title, description, and category
+- **Read**: View all courses with registration counts
+- **Update**: Edit course information inline
+- **Delete**: Remove courses (with cascade warning for registrations)
+- Modal-based editing for better UX
+
+#### 4. Course Registrations (`/admin/registrations`)
+- View all course registrations with student details
+- Update registration status: Pending → Approved/Rejected/Completed
+- Manage payment status: Unpaid → Paid/Partial
+- Track course progress (percentage)
+- View detailed registration information
+- Filter by course, status, or payment status
+
+### Security Features
+
+- **Session-based authentication** using secure HTTP-only cookies
+- **Password hashing** with bcrypt (10 rounds)
+- **Backward compatibility** for plain-text passwords (development only)
+- **Protected routes** with automatic redirect to login
+- **7-day session expiry** with secure flags in production
+
+### Admin Best Practices
+
+1. **Change Default Password**: Immediately after first login
+2. **Use Strong Passwords**: Minimum 12 characters, mix of letters, numbers, symbols
+3. **Regular Audits**: Review pending members and registrations weekly
+4. **Backup Database**: Before making bulk changes
+5. **Production Security**:
+   - Always use hashed passwords
+   - Enable HTTPS
+   - Use environment variables for secrets
+   - Implement rate limiting on login
+
 ## Database Management
 
 ### Prisma Commands
@@ -178,20 +292,44 @@ The project is configured for Netlify deployment with the `@netlify/plugin-nextj
 ```
 /app
   /actions          - Server actions for form submissions
+    admin-actions.ts         - Admin dashboard operations
+    community-actions.ts     - Community registration
+    course-actions.ts        - Course queries
+    registration-actions.ts  - Course registration
+  /admin            - Admin dashboard
+    layout.tsx               - Protected admin layout
+    page.tsx                 - Dashboard overview
+    /login                   - Admin login page
+    /community               - Community members management
+    /courses                 - Courses CRUD
+    /registrations           - Course registrations
   /community        - Community page
   /contact          - Contact page
   /learning         - Learning/courses page
   /services         - Services page
   /about            - About page
 /components
+  /admin            - Admin dashboard components
+    admin-sidebar.tsx        - Navigation sidebar
+    community-members-table.tsx
+    courses-table.tsx
+    registrations-table.tsx
   /ui               - shadcn/ui components
   /layout           - Header, Footer
   /community        - Community page components
   /home             - Homepage components
   /contact          - Contact page components
   /services         - Services page components
-/lib                - Utilities and helpers
-/prisma             - Database schema and migrations
+/lib
+  /auth             - Authentication utilities
+    session.ts               - Login, logout, session management
+  email.ts          - Email notification utilities
+  prisma.ts         - Prisma client singleton
+  utils.ts          - Utility functions
+/prisma
+  /migrations       - Database migrations
+  schema.prisma     - Database schema
+  seed.ts           - Database seed script
 /public             - Static assets
 ```
 
