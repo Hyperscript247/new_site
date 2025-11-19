@@ -5,37 +5,40 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Search } from "lucide-react"
+import { Search, FolderTree } from "lucide-react"
 import CourseRegistrationForm from "@/components/learning/course-registration-form"
-import { getCourses, getCoursesByCategory, searchCourses, seedCoursesData } from "@/app/actions/course-actions"
+import { getCourses, getCategories, searchCourses } from "@/app/actions/course-actions"
+
+// Category type definition
+type Category = {
+  id: string
+  name: string
+  slug: string
+}
 
 // Course type definition
 type Course = {
   id: string
   title: string
   description: string
-  category: string
+  categoryId: string
+  category: Category
 }
 
-// Course categories
-const categories = [
-  "Development",
-  "Data & AI",
-  "Management",
-  "Marketing"
-]
-
-// Function to get category icons
-const getCategoryIcon = (category: string) => {
-  switch (category) {
-    case "Development":
+// Function to get category icons (supports legacy category names and falls back to default)
+const getCategoryIcon = (categoryName: string) => {
+  switch (categoryName.toLowerCase()) {
+    case "development":
+    case "web development":
+    case "mobile development":
       return (
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="16 18 22 12 16 6"></polyline>
           <polyline points="8 6 2 12 8 18"></polyline>
         </svg>
       );
-    case "Data & AI":
+    case "data & ai":
+    case "data science":
       return (
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
@@ -43,7 +46,7 @@ const getCategoryIcon = (category: string) => {
           <line x1="12" y1="22.08" x2="12" y2="12"></line>
         </svg>
       );
-    case "Management":
+    case "management":
       return (
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -52,14 +55,23 @@ const getCategoryIcon = (category: string) => {
           <line x1="23" y1="11" x2="17" y2="11"></line>
         </svg>
       );
-    case "Marketing":
+    case "marketing":
       return (
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
         </svg>
       );
+    case "cloud computing":
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+        </svg>
+      );
     default:
-      return null;
+      // Default folder icon for unknown categories
+      return (
+        <FolderTree className="w-4 h-4" />
+      );
   }
 };
 
@@ -68,6 +80,7 @@ export default function CourseList() {
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null)
   const [showRegistrationForm, setShowRegistrationForm] = useState(false)
   const [courses, setCourses] = useState<Course[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [categoryData, setCategoryData] = useState<Record<string, Course[]>>({})
@@ -76,28 +89,37 @@ export default function CourseList() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [activeCardId, setActiveCardId] = useState<string | null>(null);
 
-  // Fetch all courses on component mount
+  // Fetch all courses and categories on component mount
   useEffect(() => {
     const initializeData = async () => {
       try {
         setLoading(true);
 
-        // First try to seed the data
-        await seedCoursesData();
+        // Fetch categories and courses in parallel
+        const [categoriesResult, coursesResult] = await Promise.all([
+          getCategories(),
+          getCourses()
+        ]);
 
-        // Then fetch all courses
-        const result = await getCourses();
+        if (categoriesResult.error) {
+          setError(categoriesResult.error);
+          return;
+        }
 
-        if (result.error) {
-          setError(result.error);
-        } else if (result.courses) {
-          setCourses(result.courses);
+        if (coursesResult.error) {
+          setError(coursesResult.error);
+          return;
+        }
+
+        if (categoriesResult.categories && coursesResult.courses) {
+          setCategories(categoriesResult.categories);
+          setCourses(coursesResult.courses);
 
           // Organize courses by category
           const categoryMap: Record<string, Course[]> = {};
-          categories.forEach(category => {
-            categoryMap[category] = result.courses.filter(
-              (course: Course) => course.category === category
+          categoriesResult.categories.forEach(category => {
+            categoryMap[category.name] = coursesResult.courses.filter(
+              (course: Course) => course.category.name === category.name
             );
           });
 
@@ -126,8 +148,8 @@ export default function CourseList() {
           // Reorganize by category
           const categoryMap: Record<string, Course[]> = {};
           categories.forEach(category => {
-            categoryMap[category] = result.courses.filter(
-              (course: Course) => course.category === category
+            categoryMap[category.name] = result.courses.filter(
+              (course: Course) => course.category.name === category.name
             );
           });
 
@@ -146,8 +168,8 @@ export default function CourseList() {
           // Reorganize by category
           const categoryMap: Record<string, Course[]> = {};
           categories.forEach(category => {
-            categoryMap[category] = result.courses.filter(
-              (course: Course) => course.category === category
+            categoryMap[category.name] = result.courses.filter(
+              (course: Course) => course.category.name === category.name
             );
           });
 
@@ -166,11 +188,11 @@ export default function CourseList() {
     }, 300);
 
     return () => clearTimeout(timeoutId);
-  }, [searchQuery]);
+  }, [searchQuery, categories]);
 
   // Get courses for a specific category
-  const getCoursesByCat = (category: string) => {
-    return categoryData[category] || [];
+  const getCoursesByCat = (categoryName: string) => {
+    return categoryData[categoryName] || [];
   }
 
   // Handle registration button click
@@ -227,20 +249,24 @@ export default function CourseList() {
               Try Again
             </Button>
           </div>
+        ) : categories.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">No categories available. Please contact the administrator.</p>
+          </div>
         ) : (
-          <Tabs defaultValue="Development">
+          <Tabs defaultValue={categories[0]?.name}>
             <TabsList className="mb-6 flex flex-wrap h-auto">
               {categories.map((category) => (
-                <TabsTrigger key={category} value={category} className="text-sm sm:text-base">
-                  {category}
+                <TabsTrigger key={category.id} value={category.name} className="text-sm sm:text-base">
+                  {category.name}
                 </TabsTrigger>
               ))}
             </TabsList>
 
             {categories.map((category) => (
-              <TabsContent key={category} value={category}>
+              <TabsContent key={category.id} value={category.name}>
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {getCoursesByCat(category).map((course) => (
+                  {getCoursesByCat(category.name).map((course) => (
                     <Card
                       key={course.id}
                       className="flex flex-col h-full overflow-hidden group border-2 transition-all duration-300 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 dark:hover:shadow-primary/20 relative"
@@ -265,7 +291,7 @@ export default function CourseList() {
                         <div className="flex justify-between items-start">
                           <CardTitle className="text-xl font-bold group-hover:text-primary transition-colors duration-300">{course.title}</CardTitle>
                           <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                            {getCategoryIcon(course.category)}
+                            {getCategoryIcon(course.category.name)}
                           </div>
                         </div>
                       </CardHeader>
@@ -286,9 +312,9 @@ export default function CourseList() {
                     </Card>
                   ))}
                 </div>
-                {getCoursesByCat(category).length === 0 && (
+                {getCoursesByCat(category.name).length === 0 && (
                   <div className="text-center py-12">
-                    <p className="text-muted-foreground">No courses found. Try adjusting your search.</p>
+                    <p className="text-muted-foreground">No courses found in this category. Try adjusting your search.</p>
                   </div>
                 )}
               </TabsContent>
