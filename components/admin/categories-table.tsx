@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { createCourse, updateCourse, deleteCourse } from "@/app/actions/admin-actions"
+import { createCategory, updateCategory, deleteCategory } from "@/app/actions/admin-actions"
 import { Loader2, Trash2, Edit, Plus } from "lucide-react"
 import {
   Dialog,
@@ -19,45 +19,24 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 
 type Category = {
   id: string
   name: string
   slug: string
-}
-
-type Course = {
-  id: string
-  title: string
-  description: string
-  categoryId: string
-  category: Category
+  description: string | null
   createdAt: Date
   updatedAt: Date
   _count: {
-    registrations: number
+    courses: number
   }
 }
 
-type CoursesTableProps = {
-  courses: Course[]
-  categories: Category[]
-}
-
-export default function CoursesTable({ courses, categories }: CoursesTableProps) {
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("")
-  const [editCategoryId, setEditCategoryId] = useState<string>("")
+export default function CategoriesTable({ categories }: { categories: Category[] }) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
-  const [editingCourse, setEditingCourse] = useState<Course | null>(null)
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null)
   const [error, setError] = useState("")
   const createFormRef = useRef<HTMLFormElement>(null)
   const editFormRef = useRef<HTMLFormElement>(null)
@@ -68,46 +47,62 @@ export default function CoursesTable({ courses, categories }: CoursesTableProps)
     setError("")
 
     const formData = new FormData(createFormRef.current!)
-    const result = await createCourse(formData)
+    const result = await createCategory(formData)
 
     if (result.success) {
       setIsCreateOpen(false)
       createFormRef.current?.reset()
       router.refresh()
     } else {
-      setError(result.error || "Failed to create course")
+      setError(result.error || "Failed to create category")
     }
     setIsLoading(false)
   }
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!editingCourse) return
+    if (!editingCategory) return
 
     setIsLoading(true)
     setError("")
 
     const formData = new FormData(editFormRef.current!)
-    const result = await updateCourse(editingCourse.id, formData)
+    const result = await updateCategory(editingCategory.id, formData)
 
     if (result.success) {
-      setEditingCourse(null)
+      setEditingCategory(null)
       editFormRef.current?.reset()
       router.refresh()
     } else {
-      setError(result.error || "Failed to update course")
+      setError(result.error || "Failed to update category")
     }
     setIsLoading(false)
   }
 
-  const handleDelete = async (courseId: string) => {
-    if (!confirm("Are you sure you want to delete this course? This will also delete all registrations.")) return
+  const handleDelete = async (categoryId: string, coursesCount: number) => {
+    if (coursesCount > 0) {
+      alert(`Cannot delete category with ${coursesCount} course(s). Please reassign or delete the courses first.`)
+      return
+    }
+    if (!confirm("Are you sure you want to delete this category?")) return
+
     setIsLoading(true)
-    const result = await deleteCourse(courseId)
+    const result = await deleteCategory(categoryId)
     if (result.success) {
       router.refresh()
+    } else {
+      alert(result.error || "Failed to delete category")
     }
     setIsLoading(false)
+  }
+
+  const generateSlug = (name: string) => {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim()
   }
 
   return (
@@ -118,14 +113,14 @@ export default function CoursesTable({ courses, categories }: CoursesTableProps)
           <DialogTrigger asChild>
             <Button>
               <Plus className="w-4 h-4 mr-2" />
-              Create Course
+              Create Category
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Create New Course</DialogTitle>
+              <DialogTitle>Create New Category</DialogTitle>
               <DialogDescription>
-                Add a new course to your catalog
+                Add a new course category
               </DialogDescription>
             </DialogHeader>
             <form ref={createFormRef} onSubmit={handleCreate}>
@@ -136,46 +131,45 @@ export default function CoursesTable({ courses, categories }: CoursesTableProps)
               )}
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <Label htmlFor="create-title">Title</Label>
+                  <Label htmlFor="create-name">Name</Label>
                   <Input
-                    id="create-title"
-                    name="title"
-                    placeholder="Course title"
+                    id="create-name"
+                    name="name"
+                    placeholder="e.g., Web Development"
                     required
                     disabled={isLoading}
+                    onChange={(e) => {
+                      const slugInput = document.getElementById('create-slug') as HTMLInputElement
+                      if (slugInput) {
+                        slugInput.value = generateSlug(e.target.value)
+                      }
+                    }}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="create-description">Description</Label>
+                  <Label htmlFor="create-slug">Slug</Label>
+                  <Input
+                    id="create-slug"
+                    name="slug"
+                    placeholder="e.g., web-development"
+                    required
+                    disabled={isLoading}
+                    pattern="[a-z0-9-]+"
+                    title="Lowercase letters, numbers, and hyphens only"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Auto-generated from name. Lowercase letters, numbers, and hyphens only.
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="create-description">Description (Optional)</Label>
                   <Textarea
                     id="create-description"
                     name="description"
-                    placeholder="Course description"
-                    rows={4}
-                    required
+                    placeholder="Brief description of this category"
+                    rows={3}
                     disabled={isLoading}
                   />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="create-category">Category</Label>
-                  <Select
-                    name="categoryId"
-                    required
-                    disabled={isLoading}
-                    onValueChange={setSelectedCategoryId}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <input type="hidden" name="categoryId" value={selectedCategoryId} />
                 </div>
               </div>
               <DialogFooter>
@@ -189,7 +183,7 @@ export default function CoursesTable({ courses, categories }: CoursesTableProps)
                       Creating...
                     </>
                   ) : (
-                    "Create Course"
+                    "Create Category"
                   )}
                 </Button>
               </DialogFooter>
@@ -199,12 +193,12 @@ export default function CoursesTable({ courses, categories }: CoursesTableProps)
       </div>
 
       {/* Edit Dialog */}
-      <Dialog open={!!editingCourse} onOpenChange={(open) => !open && setEditingCourse(null)}>
+      <Dialog open={!!editingCategory} onOpenChange={(open) => !open && setEditingCategory(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Course</DialogTitle>
+            <DialogTitle>Edit Category</DialogTitle>
             <DialogDescription>
-              Update course information
+              Update category information
             </DialogDescription>
           </DialogHeader>
           <form ref={editFormRef} onSubmit={handleUpdate}>
@@ -215,53 +209,52 @@ export default function CoursesTable({ courses, categories }: CoursesTableProps)
             )}
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="edit-title">Title</Label>
+                <Label htmlFor="edit-name">Name</Label>
                 <Input
-                  id="edit-title"
-                  name="title"
-                  defaultValue={editingCourse?.title}
-                  placeholder="Course title"
+                  id="edit-name"
+                  name="name"
+                  defaultValue={editingCategory?.name}
+                  placeholder="Category name"
                   required
                   disabled={isLoading}
+                  onChange={(e) => {
+                    const slugInput = document.getElementById('edit-slug') as HTMLInputElement
+                    if (slugInput) {
+                      slugInput.value = generateSlug(e.target.value)
+                    }
+                  }}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="edit-description">Description</Label>
+                <Label htmlFor="edit-slug">Slug</Label>
+                <Input
+                  id="edit-slug"
+                  name="slug"
+                  defaultValue={editingCategory?.slug}
+                  placeholder="category-slug"
+                  required
+                  disabled={isLoading}
+                  pattern="[a-z0-9-]+"
+                  title="Lowercase letters, numbers, and hyphens only"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Auto-generated from name. Lowercase letters, numbers, and hyphens only.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-description">Description (Optional)</Label>
                 <Textarea
                   id="edit-description"
                   name="description"
-                  defaultValue={editingCourse?.description}
-                  placeholder="Course description"
-                  rows={4}
-                  required
+                  defaultValue={editingCategory?.description || ''}
+                  placeholder="Brief description of this category"
+                  rows={3}
                   disabled={isLoading}
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-category">Category</Label>
-                <Select
-                  name="categoryId"
-                  required
-                  disabled={isLoading}
-                  value={editCategoryId || editingCourse?.categoryId}
-                  onValueChange={setEditCategoryId}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <input type="hidden" name="categoryId" value={editCategoryId || editingCourse?.categoryId} />
-              </div>
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setEditingCourse(null)} disabled={isLoading}>
+              <Button type="button" variant="outline" onClick={() => setEditingCategory(null)} disabled={isLoading}>
                 Cancel
               </Button>
               <Button type="submit" disabled={isLoading}>
@@ -271,7 +264,7 @@ export default function CoursesTable({ courses, categories }: CoursesTableProps)
                     Updating...
                   </>
                 ) : (
-                  "Update Course"
+                  "Update Category"
                 )}
               </Button>
             </DialogFooter>
@@ -279,11 +272,11 @@ export default function CoursesTable({ courses, categories }: CoursesTableProps)
         </DialogContent>
       </Dialog>
 
-      {/* Courses Table */}
-      {courses.length === 0 ? (
+      {/* Categories Table */}
+      {categories.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground">No courses yet. Create your first course!</p>
+            <p className="text-muted-foreground">No categories yet. Create your first category!</p>
           </CardContent>
         </Card>
       ) : (
@@ -294,13 +287,13 @@ export default function CoursesTable({ courses, categories }: CoursesTableProps)
                 <thead className="bg-muted/50 border-b">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                      Title
+                      Name
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                      Category
+                      Slug
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                      Registrations
+                      Courses
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                       Created
@@ -311,33 +304,35 @@ export default function CoursesTable({ courses, categories }: CoursesTableProps)
                   </tr>
                 </thead>
                 <tbody className="divide-y">
-                  {courses.map((course) => (
-                    <tr key={course.id} className="hover:bg-muted/30">
+                  {categories.map((category) => (
+                    <tr key={category.id} className="hover:bg-muted/30">
                       <td className="px-6 py-4">
                         <div>
-                          <div className="font-medium">{course.title}</div>
-                          <div className="text-sm text-muted-foreground truncate max-w-md">
-                            {course.description}
-                          </div>
+                          <div className="font-medium">{category.name}</div>
+                          {category.description && (
+                            <div className="text-sm text-muted-foreground truncate max-w-md">
+                              {category.description}
+                            </div>
+                          )}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="inline-block px-2 py-1 text-xs rounded-full bg-primary/10 text-primary">
-                          {course.category.name}
-                        </span>
+                        <code className="text-xs bg-muted px-2 py-1 rounded">
+                          {category.slug}
+                        </code>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        {course._count.registrations}
+                        {category._count.courses}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                        {format(new Date(course.createdAt), "MMM d, yyyy")}
+                        {format(new Date(category.createdAt), "MMM d, yyyy")}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <div className="flex items-center gap-2">
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => setEditingCourse(course)}
+                            onClick={() => setEditingCategory(category)}
                             disabled={isLoading}
                           >
                             <Edit className="w-4 h-4" />
@@ -345,7 +340,7 @@ export default function CoursesTable({ courses, categories }: CoursesTableProps)
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleDelete(course.id)}
+                            onClick={() => handleDelete(category.id, category._count.courses)}
                             disabled={isLoading}
                           >
                             {isLoading ? (

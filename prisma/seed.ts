@@ -32,6 +32,53 @@ async function main() {
   console.log('⚠️  IMPORTANT: Change the default password after first login!')
   console.log('')
 
+  // Create categories
+  const webDevCategory = await prisma.category.upsert({
+    where: { slug: 'web-development' },
+    update: {},
+    create: {
+      id: 'cat-web-dev',
+      name: 'Web Development',
+      slug: 'web-development',
+      description: 'Full-stack web development courses covering frontend, backend, and databases',
+    },
+  })
+
+  const dataScienceCategory = await prisma.category.upsert({
+    where: { slug: 'data-science' },
+    update: {},
+    create: {
+      id: 'cat-data-science',
+      name: 'Data Science',
+      slug: 'data-science',
+      description: 'Data analysis, machine learning, and AI courses',
+    },
+  })
+
+  const cloudCategory = await prisma.category.upsert({
+    where: { slug: 'cloud-computing' },
+    update: {},
+    create: {
+      id: 'cat-cloud',
+      name: 'Cloud Computing',
+      slug: 'cloud-computing',
+      description: 'Cloud infrastructure, deployment, and DevOps courses',
+    },
+  })
+
+  const mobileDevCategory = await prisma.category.upsert({
+    where: { slug: 'mobile-development' },
+    update: {},
+    create: {
+      id: 'cat-mobile-dev',
+      name: 'Mobile Development',
+      slug: 'mobile-development',
+      description: 'iOS and Android app development courses',
+    },
+  })
+
+  console.log('✓ Created 4 categories')
+
   // Create sample courses
   const courses = await Promise.all([
     prisma.course.upsert({
@@ -41,7 +88,7 @@ async function main() {
         id: 'course-web-dev',
         title: 'Full Stack Web Development',
         description: 'Learn modern web development with React, Node.js, and PostgreSQL. Build real-world applications from scratch.',
-        category: 'Web Development',
+        categoryId: webDevCategory.id,
       },
     }),
     prisma.course.upsert({
@@ -51,7 +98,7 @@ async function main() {
         id: 'course-data-science',
         title: 'Data Science with Python',
         description: 'Master data analysis, visualization, and machine learning using Python and popular libraries.',
-        category: 'Data Science',
+        categoryId: dataScienceCategory.id,
       },
     }),
     prisma.course.upsert({
@@ -61,7 +108,7 @@ async function main() {
         id: 'course-cloud',
         title: 'Cloud Computing Fundamentals',
         description: 'Learn cloud architecture, deployment, and management with AWS, Azure, and Google Cloud.',
-        category: 'Cloud Computing',
+        categoryId: cloudCategory.id,
       },
     }),
   ])

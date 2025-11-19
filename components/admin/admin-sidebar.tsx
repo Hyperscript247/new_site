@@ -14,12 +14,14 @@ import {
   LogOut,
   Menu,
   X,
+  FolderTree,
 } from "lucide-react"
 import { useState } from "react"
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Community Members", href: "/admin/community", icon: Users },
+  { name: "Categories", href: "/admin/categories", icon: FolderTree },
   { name: "Courses", href: "/admin/courses", icon: GraduationCap },
   { name: "Registrations", href: "/admin/registrations", icon: FileText },
 ]

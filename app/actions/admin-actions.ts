@@ -51,11 +51,127 @@ export async function deleteCommunityMember(memberId: string) {
   }
 }
 
+// Category Actions
+const categorySchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  slug: z.string().min(1, 'Slug is required').regex(/^[a-z0-9-]+$/, 'Slug must be lowercase letters, numbers, and hyphens only'),
+  description: z.string().optional(),
+})
+
+export async function getCategories() {
+  await requireAuth()
+
+  try {
+    const categories = await prisma.category.findMany({
+      include: {
+        _count: {
+          select: { courses: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    })
+    return { success: true, categories }
+  } catch (error) {
+    console.error('Error fetching categories:', error)
+    return { success: false, error: 'Failed to fetch categories' }
+  }
+}
+
+export async function createCategory(data: FormData) {
+  await requireAuth()
+
+  try {
+    const rawData = {
+      name: data.get('name') as string,
+      slug: data.get('slug') as string,
+      description: data.get('description') as string || undefined,
+    }
+
+    const validatedData = categorySchema.parse(rawData)
+
+    const category = await prisma.category.create({
+      data: validatedData,
+    })
+
+    revalidatePath('/admin/categories')
+    return { success: true, category }
+  } catch (error) {
+    console.error('Error creating category:', error)
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        error: 'Validation failed',
+        fieldErrors: error.flatten().fieldErrors,
+      }
+    }
+    return { success: false, error: 'Failed to create category' }
+  }
+}
+
+export async function updateCategory(categoryId: string, data: FormData) {
+  await requireAuth()
+
+  try {
+    const rawData = {
+      name: data.get('name') as string,
+      slug: data.get('slug') as string,
+      description: data.get('description') as string || undefined,
+    }
+
+    const validatedData = categorySchema.parse(rawData)
+
+    const category = await prisma.category.update({
+      where: { id: categoryId },
+      data: validatedData,
+    })
+
+    revalidatePath('/admin/categories')
+    return { success: true, category }
+  } catch (error) {
+    console.error('Error updating category:', error)
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        error: 'Validation failed',
+        fieldErrors: error.flatten().fieldErrors,
+      }
+    }
+    return { success: false, error: 'Failed to update category' }
+  }
+}
+
+export async function deleteCategory(categoryId: string) {
+  await requireAuth()
+
+  try {
+    // Check if category has courses
+    const coursesCount = await prisma.course.count({
+      where: { categoryId },
+    })
+
+    if (coursesCount > 0) {
+      return {
+        success: false,
+        error: `Cannot delete category with ${coursesCount} course(s). Please reassign or delete the courses first.`
+      }
+    }
+
+    await prisma.category.delete({
+      where: { id: categoryId },
+    })
+    revalidatePath('/admin/categories')
+    return { success: true }
+  } catch (error) {
+    console.error('Error deleting category:', error)
+    return { success: false, error: 'Failed to delete category' }
+  }
+}
+
 // Course Actions
 const courseSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().min(1, 'Description is required'),
-  category: z.string().min(1, 'Category is required'),
+  categoryId: z.string().min(1, 'Category is required'),
 })
 
 export async function getCourses() {
@@ -64,6 +180,7 @@ export async function getCourses() {
   try {
     const courses = await prisma.course.findMany({
       include: {
+        category: true,
         _count: {
           select: { registrations: true },
         },
@@ -84,7 +201,7 @@ export async function createCourse(data: FormData) {
     const rawData = {
       title: data.get('title') as string,
       description: data.get('description') as string,
-      category: data.get('category') as string,
+      categoryId: data.get('categoryId') as string,
     }
 
     const validatedData = courseSchema.parse(rawData)
@@ -115,7 +232,7 @@ export async function updateCourse(courseId: string, data: FormData) {
     const rawData = {
       title: data.get('title') as string,
       description: data.get('description') as string,
-      category: data.get('category') as string,
+      categoryId: data.get('categoryId') as string,
     }
 
     const validatedData = courseSchema.parse(rawData)
@@ -213,6 +330,7 @@ export async function getDashboardStats() {
     const [
       totalCommunityMembers,
       pendingCommunityMembers,
+      totalCategories,
       totalCourses,
       totalRegistrations,
       pendingRegistrations,
@@ -221,6 +339,7 @@ export async function getDashboardStats() {
     ] = await Promise.all([
       prisma.communityMember.count(),
       prisma.communityMember.count({ where: { status: 'Pending' } }),
+      prisma.category.count(),
       prisma.course.count(),
       prisma.registration.count(),
       prisma.registration.count({ where: { status: 'Pending' } }),
@@ -250,6 +369,7 @@ export async function getDashboardStats() {
       stats: {
         totalCommunityMembers,
         pendingCommunityMembers,
+        totalCategories,
         totalCourses,
         totalRegistrations,
         pendingRegistrations,

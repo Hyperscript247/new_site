@@ -1,6 +1,6 @@
 import { getDashboardStats } from "@/app/actions/admin-actions"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, UserCheck, GraduationCap, FileText, Clock } from "lucide-react"
+import { Users, UserCheck, GraduationCap, FileText, Clock, FolderTree } from "lucide-react"
 import { format } from "date-fns"
 
 export const dynamic = 'force-dynamic'
@@ -26,6 +26,14 @@ export default async function AdminDashboard() {
       icon: Users,
       color: "text-blue-600",
       bgColor: "bg-blue-50 dark:bg-blue-900/20",
+    },
+    {
+      title: "Categories",
+      value: stats.totalCategories,
+      subtitle: "Course categories",
+      icon: FolderTree,
+      color: "text-cyan-600",
+      bgColor: "bg-cyan-50 dark:bg-cyan-900/20",
     },
     {
       title: "Total Courses",
@@ -64,7 +72,7 @@ export default async function AdminDashboard() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
         {statCards.map((stat) => {
           const Icon = stat.icon
           return (

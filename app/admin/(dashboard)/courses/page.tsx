@@ -1,15 +1,26 @@
-import { getCourses } from "@/app/actions/admin-actions"
+import { getCourses, getCategories } from "@/app/actions/admin-actions"
 import CoursesTable from "@/components/admin/courses-table"
 
 export const dynamic = 'force-dynamic'
 
 export default async function CoursesPage() {
-  const result = await getCourses()
+  const [coursesResult, categoriesResult] = await Promise.all([
+    getCourses(),
+    getCategories(),
+  ])
 
-  if (!result.success || !result.courses) {
+  if (!coursesResult.success || !coursesResult.courses) {
     return (
       <div className="p-4">
         <p className="text-red-500">Failed to load courses</p>
+      </div>
+    )
+  }
+
+  if (!categoriesResult.success || !categoriesResult.categories) {
+    return (
+      <div className="p-4">
+        <p className="text-red-500">Failed to load categories</p>
       </div>
     )
   }
@@ -23,7 +34,7 @@ export default async function CoursesPage() {
         </p>
       </div>
 
-      <CoursesTable courses={result.courses} />
+      <CoursesTable courses={coursesResult.courses} categories={categoriesResult.categories} />
     </div>
   )
 }
