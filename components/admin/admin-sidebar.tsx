@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { logout } from "@/lib/auth/session"
+import { ThemeToggle } from "@/components/ui/theme-toggle"
 import {
   LayoutDashboard,
   Users,
@@ -98,8 +99,12 @@ export default function AdminSidebar({ username }: { username: string }) {
             })}
           </nav>
 
-          {/* Logout button */}
-          <div className="p-4 border-t">
+          {/* Theme toggle and Logout button */}
+          <div className="p-4 border-t space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">Theme</span>
+              <ThemeToggle />
+            </div>
             <Button
               variant="outline"
               className="w-full justify-start"
