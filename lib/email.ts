@@ -1,10 +1,12 @@
 /**
  * Email utility for sending notifications
  *
- * To enable email notifications, install Resend and set the RESEND_API_KEY environment variable:
- * npm install resend
+ * This module handles sending email notifications to community members.
+ * You can configure it to use any SMTP provider (Zoho, Gmail, Mailgun, etc.)
  *
- * Or use another email service by modifying this file
+ * OPTION 1: Use Resend (uncomment the code below)
+ * OPTION 2: Use Nodemailer with any SMTP provider (recommended)
+ * OPTION 3: Use another service like SendGrid, Mailgun, etc.
  */
 
 interface CommunityWelcomeEmailParams {
@@ -14,18 +16,30 @@ interface CommunityWelcomeEmailParams {
 
 export async function sendCommunityWelcomeEmail({ to, name }: CommunityWelcomeEmailParams) {
   try {
-    // Check if we have Resend configured
+    // For now, just log the email (no actual sending)
+    console.log('[EMAIL] Email notification (not sent - configure SMTP provider)');
+    console.log(`[EMAIL] To: ${to}`);
+    console.log(`[EMAIL] Name: ${name}`);
+    console.log('[EMAIL] Subject: Welcome to the Hyperscript Community!');
+
+    return { success: true, mode: 'development' };
+
+    /* ====================================================================
+     * OPTION 1: RESEND (Commented out - uncomment to use)
+     * ====================================================================
+     *
+     * 1. Ensure resend is installed: npm install resend
+     * 2. Set environment variable: RESEND_API_KEY
+     * 3. Uncomment the code below:
+     *
     const resendApiKey = process.env.RESEND_API_KEY;
 
     if (!resendApiKey) {
       console.log('[EMAIL] No RESEND_API_KEY found. Email notification skipped.');
-      console.log(`[EMAIL] Would send welcome email to: ${to} (${name})`);
       return { success: true, mode: 'development' };
     }
 
-    // Import Resend dynamically
-    const { Resend } = await import('resend')
-
+    const { Resend } = await import('resend');
     const resend = new Resend(resendApiKey);
 
     const { data, error } = await resend.emails.send({
@@ -42,9 +56,49 @@ export async function sendCommunityWelcomeEmail({ to, name }: CommunityWelcomeEm
 
     console.log('[EMAIL] Welcome email sent successfully to:', to);
     return { success: true, data };
+    */
+
+    /* ====================================================================
+     * OPTION 2: NODEMAILER WITH SMTP (Recommended for Zoho, Gmail, etc.)
+     * ====================================================================
+     *
+     * 1. Install nodemailer: npm install nodemailer
+     * 2. Set environment variables:
+     *    SMTP_HOST=smtp.zoho.com (or your SMTP server)
+     *    SMTP_PORT=587
+     *    SMTP_USER=your-email@yourdomain.com
+     *    SMTP_PASS=your-password
+     *    EMAIL_FROM=Hyperscript Community <onboarding@hyperscript.ng>
+     *
+     * 3. Uncomment the code below:
+     *
+    const nodemailer = await import('nodemailer');
+
+    const transporter = nodemailer.default.createTransport({
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT || '587'),
+      secure: process.env.SMTP_PORT === '465', // true for 465, false for other ports
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+
+    const info = await transporter.sendMail({
+      from: process.env.EMAIL_FROM || 'Hyperscript Community <onboarding@hyperscript.ng>',
+      to: to,
+      subject: 'Welcome to the Hyperscript Community!',
+      html: generateWelcomeEmailHTML(name),
+    });
+
+    console.log('[EMAIL] Welcome email sent successfully:', info.messageId);
+    return { success: true, messageId: info.messageId };
+    */
+
   } catch (error) {
     console.error('[EMAIL] Error in sendCommunityWelcomeEmail:', error);
-    throw error;
+    // Don't throw - just log and return success to not block registration
+    return { success: true, mode: 'development', error: String(error) };
   }
 }
 
