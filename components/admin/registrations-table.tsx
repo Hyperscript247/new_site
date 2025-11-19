@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -41,18 +42,25 @@ type Registration = {
 }
 
 export default function RegistrationsTable({ registrations }: { registrations: Registration[] }) {
+  const router = useRouter()
   const [isUpdating, setIsUpdating] = useState<string | null>(null)
   const [selectedRegistration, setSelectedRegistration] = useState<Registration | null>(null)
 
   const handleStatusChange = async (registrationId: string, status: string) => {
     setIsUpdating(registrationId)
-    await updateRegistrationStatus(registrationId, status)
+    const result = await updateRegistrationStatus(registrationId, status)
+    if (result.success) {
+      router.refresh()
+    }
     setIsUpdating(null)
   }
 
   const handlePaymentStatusChange = async (registrationId: string, paymentStatus: string) => {
     setIsUpdating(registrationId)
-    await updatePaymentStatus(registrationId, paymentStatus)
+    const result = await updatePaymentStatus(registrationId, paymentStatus)
+    if (result.success) {
+      router.refresh()
+    }
     setIsUpdating(null)
   }
 

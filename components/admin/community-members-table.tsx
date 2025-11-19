@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -43,19 +44,26 @@ type CommunityMember = {
 }
 
 export default function CommunityMembersTable({ members }: { members: CommunityMember[] }) {
+  const router = useRouter()
   const [isUpdating, setIsUpdating] = useState<string | null>(null)
   const [selectedMember, setSelectedMember] = useState<CommunityMember | null>(null)
 
   const handleStatusChange = async (memberId: string, status: string) => {
     setIsUpdating(memberId)
-    await updateCommunityMemberStatus(memberId, status)
+    const result = await updateCommunityMemberStatus(memberId, status)
+    if (result.success) {
+      router.refresh()
+    }
     setIsUpdating(null)
   }
 
   const handleDelete = async (memberId: string) => {
     if (!confirm("Are you sure you want to delete this member?")) return
     setIsUpdating(memberId)
-    await deleteCommunityMember(memberId)
+    const result = await deleteCommunityMember(memberId)
+    if (result.success) {
+      router.refresh()
+    }
     setIsUpdating(null)
   }
 
