@@ -190,6 +190,12 @@ export default function CourseList() {
     return () => clearTimeout(timeoutId);
   }, [searchQuery, categories]);
 
+  // Filter categories to only show those with courses
+  const categoriesWithCourses = categories.filter(category => {
+    const coursesInCategory = categoryData[category.name] || [];
+    return coursesInCategory.length > 0;
+  });
+
   // Get courses for a specific category
   const getCoursesByCat = (categoryName: string) => {
     return categoryData[categoryName] || [];
@@ -249,21 +255,78 @@ export default function CourseList() {
               Try Again
             </Button>
           </div>
-        ) : categories.length === 0 ? (
+        ) : courses.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">No categories available. Please contact the administrator.</p>
+            <p className="text-muted-foreground">No courses available at the moment.</p>
           </div>
         ) : (
-          <Tabs defaultValue={categories[0]?.name}>
+          <Tabs defaultValue="All">
             <TabsList className="mb-6 flex flex-wrap h-auto">
-              {categories.map((category) => (
+              {/* All tab */}
+              <TabsTrigger value="All" className="text-sm sm:text-base">
+                All
+              </TabsTrigger>
+              {/* Category tabs - only show categories with courses */}
+              {categoriesWithCourses.map((category) => (
                 <TabsTrigger key={category.id} value={category.name} className="text-sm sm:text-base">
                   {category.name}
                 </TabsTrigger>
               ))}
             </TabsList>
 
-            {categories.map((category) => (
+            {/* All courses tab */}
+            <TabsContent value="All">
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {courses.map((course) => (
+                  <Card
+                    key={course.id}
+                    className="flex flex-col h-full overflow-hidden group border-2 transition-all duration-300 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 dark:hover:shadow-primary/20 relative"
+                    onMouseMove={(e) => handleMouseMove(e, course.id)}
+                    onMouseLeave={handleMouseLeave}
+                  >
+                    {/* Static hover background */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                    {/* Mouse-following effect */}
+                    {activeCardId === course.id && (
+                      <div
+                        className="absolute pointer-events-none w-[150px] h-[150px] rounded-full bg-primary/20 dark:bg-primary/30 blur-2xl mix-blend-soft-light transform -translate-x-1/2 -translate-y-1/2 z-0 transition-all duration-300"
+                        style={{
+                          left: `${mousePosition.x}px`,
+                          top: `${mousePosition.y}px`,
+                        }}
+                      />
+                    )}
+
+                    <CardHeader className="relative z-10 pb-2">
+                      <div className="flex justify-between items-start">
+                        <CardTitle className="text-xl font-bold group-hover:text-primary transition-colors duration-300">{course.title}</CardTitle>
+                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                          {getCategoryIcon(course.category.name)}
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="relative z-10 flex-grow py-2">
+                      <CardDescription className="text-base font-medium text-foreground/80 dark:text-foreground/70">
+                        {course.description}
+                      </CardDescription>
+                    </CardContent>
+                    <CardFooter className="relative z-10 pt-2">
+                      <Button
+                        variant="outline"
+                        className="w-full bg-background hover:bg-primary hover:text-primary-foreground transition-all duration-300 border-primary/30 group-hover:border-primary font-medium"
+                        onClick={() => handleRegisterClick(course)}
+                      >
+                        Register
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+
+            {/* Category tabs */}
+            {categoriesWithCourses.map((category) => (
               <TabsContent key={category.id} value={category.name}>
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                   {getCoursesByCat(category.name).map((course) => (
