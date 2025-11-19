@@ -7,7 +7,13 @@ export async function getCourses() {
   try {
     const courses = await prisma.course.findMany({
       include: {
-        category: true,
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
       },
       orderBy: {
         id: 'asc',
@@ -29,6 +35,33 @@ export async function getCategories() {
     return { categories }
   } catch (error) {
     return { error: 'Failed to fetch categories' }
+  }
+}
+
+// Optimized query: Get categories with their courses in a single database call
+export async function getCategoriesWithCourses() {
+  try {
+    const categories = await prisma.category.findMany({
+      include: {
+        courses: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            categoryId: true,
+          },
+          orderBy: {
+            id: 'asc',
+          },
+        },
+      },
+      orderBy: {
+        name: 'asc',
+      },
+    })
+    return { categories }
+  } catch (error) {
+    return { error: 'Failed to fetch categories with courses' }
   }
 }
 
@@ -71,7 +104,13 @@ export async function searchCourses(searchTerm: string) {
         ],
       },
       include: {
-        category: true,
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
       },
       orderBy: {
         id: 'asc',

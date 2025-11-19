@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Search, FolderTree } from "lucide-react"
 import CourseRegistrationForm from "@/components/learning/course-registration-form"
-import { getCourses, getCategories, searchCourses } from "@/app/actions/course-actions"
+import { getCategoriesWithCourses, searchCourses } from "@/app/actions/course-actions"
 
 // Category type definition
 type Category = {
@@ -16,13 +16,26 @@ type Category = {
   slug: string
 }
 
-// Course type definition
+// Course type definition (for display)
 type Course = {
   id: string
   title: string
   description: string
   categoryId: string
   category: Category
+}
+
+// Category with courses type (from optimized query)
+type CategoryWithCourses = {
+  id: string
+  name: string
+  slug: string
+  courses: {
+    id: string
+    title: string
+    description: string
+    categoryId: string
+  }[]
 }
 
 // Function to get category icons (supports legacy category names and falls back to default)
@@ -95,34 +108,44 @@ export default function CourseList() {
       try {
         setLoading(true);
 
-        // Fetch categories and courses in parallel
-        const [categoriesResult, coursesResult] = await Promise.all([
-          getCategories(),
-          getCourses()
-        ]);
+        // Optimized: Fetch categories with courses in a single query
+        const result = await getCategoriesWithCourses();
 
-        if (categoriesResult.error) {
-          setError(categoriesResult.error);
+        if (result.error) {
+          setError(result.error);
           return;
         }
 
-        if (coursesResult.error) {
-          setError(coursesResult.error);
-          return;
-        }
+        if (result.categories) {
+          const categoriesData = result.categories as CategoryWithCourses[];
 
-        if (categoriesResult.categories && coursesResult.courses) {
-          setCategories(categoriesResult.categories);
-          setCourses(coursesResult.courses);
+          // Extract categories
+          const cats: Category[] = categoriesData.map(cat => ({
+            id: cat.id,
+            name: cat.name,
+            slug: cat.slug,
+          }));
+          setCategories(cats);
 
-          // Organize courses by category
+          // Transform and flatten courses for "All" tab
+          const allCourses: Course[] = [];
           const categoryMap: Record<string, Course[]> = {};
-          categoriesResult.categories.forEach(category => {
-            categoryMap[category.name] = coursesResult.courses.filter(
-              (course: Course) => course.category.name === category.name
-            );
+
+          categoriesData.forEach(category => {
+            const coursesWithCategory: Course[] = category.courses.map(course => ({
+              ...course,
+              category: {
+                id: category.id,
+                name: category.name,
+                slug: category.slug,
+              },
+            }));
+
+            categoryMap[category.name] = coursesWithCategory;
+            allCourses.push(...coursesWithCategory);
           });
 
+          setCourses(allCourses);
           setCategoryData(categoryMap);
         }
       } catch (err) {
@@ -140,20 +163,52 @@ export default function CourseList() {
   useEffect(() => {
     const handleSearch = async () => {
       if (!searchQuery) {
-        // If search is cleared, reset to all courses
-        const result = await getCourses();
-        if (result.courses) {
-          setCourses(result.courses);
+        // If search is cleared, reload all data
+        try {
+          setLoading(true);
+          const result = await getCategoriesWithCourses();
 
-          // Reorganize by category
-          const categoryMap: Record<string, Course[]> = {};
-          categories.forEach(category => {
-            categoryMap[category.name] = result.courses.filter(
-              (course: Course) => course.category.name === category.name
-            );
-          });
+          if (result.error) {
+            setError(result.error);
+            return;
+          }
 
-          setCategoryData(categoryMap);
+          if (result.categories) {
+            const categoriesData = result.categories as CategoryWithCourses[];
+
+            // Extract categories
+            const cats: Category[] = categoriesData.map(cat => ({
+              id: cat.id,
+              name: cat.name,
+              slug: cat.slug,
+            }));
+            setCategories(cats);
+
+            // Transform and flatten courses
+            const allCourses: Course[] = [];
+            const categoryMap: Record<string, Course[]> = {};
+
+            categoriesData.forEach(category => {
+              const coursesWithCategory: Course[] = category.courses.map(course => ({
+                ...course,
+                category: {
+                  id: category.id,
+                  name: category.name,
+                  slug: category.slug,
+                },
+              }));
+
+              categoryMap[category.name] = coursesWithCategory;
+              allCourses.push(...coursesWithCategory);
+            });
+
+            setCourses(allCourses);
+            setCategoryData(categoryMap);
+          }
+        } catch (err) {
+          console.error('Error reloading courses:', err);
+        } finally {
+          setLoading(false);
         }
         return;
       }
