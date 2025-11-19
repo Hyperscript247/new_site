@@ -15,8 +15,10 @@ import {
   Menu,
   X,
   FolderTree,
+  UserCog,
 } from "lucide-react"
 import { useState } from "react"
+import PasswordUpdateDialog from "./password-update-dialog"
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -24,6 +26,7 @@ const navigation = [
   { name: "Categories", href: "/admin/categories", icon: FolderTree },
   { name: "Courses", href: "/admin/courses", icon: GraduationCap },
   { name: "Registrations", href: "/admin/registrations", icon: FileText },
+  { name: "Admin Users", href: "/admin/users", icon: UserCog },
 ]
 
 export default function AdminSidebar({ username }: { username: string }) {
@@ -101,12 +104,13 @@ export default function AdminSidebar({ username }: { username: string }) {
             })}
           </nav>
 
-          {/* Theme toggle and Logout button */}
+          {/* Theme toggle, Password Update, and Logout button */}
           <div className="p-4 border-t space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Theme</span>
               <ThemeToggle />
             </div>
+            <PasswordUpdateDialog />
             <Button
               variant="outline"
               className="w-full justify-start"

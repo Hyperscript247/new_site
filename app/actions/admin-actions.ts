@@ -1,7 +1,7 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
-import { requireAuth } from '@/lib/auth/session'
+import { requireAuth, hashPassword, verifyPassword, getSession } from '@/lib/auth/session'
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 
@@ -380,5 +380,215 @@ export async function getDashboardStats() {
   } catch (error) {
     console.error('Error fetching dashboard stats:', error)
     return { success: false, error: 'Failed to fetch dashboard stats' }
+  }
+}
+
+// Admin User Management Actions
+const adminUserSchema = z.object({
+  username: z.string().min(3, 'Username must be at least 3 characters'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+})
+
+const updatePasswordSchema = z.object({
+  currentPassword: z.string().min(1, 'Current password is required'),
+  newPassword: z.string().min(6, 'New password must be at least 6 characters'),
+  confirmPassword: z.string().min(1, 'Confirm password is required'),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+})
+
+export async function getAdminUsers() {
+  await requireAuth()
+
+  try {
+    const admins = await prisma.admin.findMany({
+      select: {
+        id: true,
+        username: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    })
+    return { success: true, admins }
+  } catch (error) {
+    console.error('Error fetching admin users:', error)
+    return { success: false, error: 'Failed to fetch admin users' }
+  }
+}
+
+export async function createAdminUser(data: FormData) {
+  await requireAuth()
+
+  try {
+    const rawData = {
+      username: data.get('username') as string,
+      password: data.get('password') as string,
+    }
+
+    const validatedData = adminUserSchema.parse(rawData)
+
+    // Check if username already exists
+    const existing = await prisma.admin.findUnique({
+      where: { username: validatedData.username },
+    })
+
+    if (existing) {
+      return { success: false, error: 'Username already exists' }
+    }
+
+    // Hash password
+    const hashedPassword = await hashPassword(validatedData.password)
+
+    const admin = await prisma.admin.create({
+      data: {
+        username: validatedData.username,
+        password: hashedPassword,
+      },
+      select: {
+        id: true,
+        username: true,
+        createdAt: true,
+      },
+    })
+
+    revalidatePath('/admin/users')
+    return { success: true, admin }
+  } catch (error) {
+    console.error('Error creating admin user:', error)
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        error: 'Validation failed',
+        fieldErrors: error.flatten().fieldErrors,
+      }
+    }
+    return { success: false, error: 'Failed to create admin user' }
+  }
+}
+
+export async function updateAdminUsername(adminId: string, data: FormData) {
+  await requireAuth()
+
+  try {
+    const username = data.get('username') as string
+
+    if (!username || username.length < 3) {
+      return { success: false, error: 'Username must be at least 3 characters' }
+    }
+
+    // Check if username already exists (excluding current admin)
+    const existing = await prisma.admin.findFirst({
+      where: {
+        username,
+        NOT: { id: adminId },
+      },
+    })
+
+    if (existing) {
+      return { success: false, error: 'Username already exists' }
+    }
+
+    const admin = await prisma.admin.update({
+      where: { id: adminId },
+      data: { username },
+      select: {
+        id: true,
+        username: true,
+        updatedAt: true,
+      },
+    })
+
+    revalidatePath('/admin/users')
+    return { success: true, admin }
+  } catch (error) {
+    console.error('Error updating admin user:', error)
+    return { success: false, error: 'Failed to update admin user' }
+  }
+}
+
+export async function deleteAdminUser(adminId: string) {
+  await requireAuth()
+
+  try {
+    // Prevent deleting the last admin
+    const adminCount = await prisma.admin.count()
+    if (adminCount <= 1) {
+      return { success: false, error: 'Cannot delete the last admin user' }
+    }
+
+    // Prevent self-deletion
+    const session = await getSession()
+    if (session && session.id === adminId) {
+      return { success: false, error: 'Cannot delete your own account' }
+    }
+
+    await prisma.admin.delete({
+      where: { id: adminId },
+    })
+
+    revalidatePath('/admin/users')
+    return { success: true }
+  } catch (error) {
+    console.error('Error deleting admin user:', error)
+    return { success: false, error: 'Failed to delete admin user' }
+  }
+}
+
+export async function updatePassword(data: FormData) {
+  const session = await requireAuth()
+
+  try {
+    const rawData = {
+      currentPassword: data.get('currentPassword') as string,
+      newPassword: data.get('newPassword') as string,
+      confirmPassword: data.get('confirmPassword') as string,
+    }
+
+    const validatedData = updatePasswordSchema.parse(rawData)
+
+    // Get current admin
+    const admin = await prisma.admin.findUnique({
+      where: { id: session.id },
+    })
+
+    if (!admin) {
+      return { success: false, error: 'Admin not found' }
+    }
+
+    // Verify current password
+    const isHashed = admin.password.startsWith('$2a$') || admin.password.startsWith('$2b$')
+    let isValid = false
+
+    if (isHashed) {
+      isValid = await verifyPassword(validatedData.currentPassword, admin.password)
+    } else {
+      isValid = admin.password === validatedData.currentPassword
+    }
+
+    if (!isValid) {
+      return { success: false, error: 'Current password is incorrect' }
+    }
+
+    // Hash new password
+    const hashedPassword = await hashPassword(validatedData.newPassword)
+
+    // Update password
+    await prisma.admin.update({
+      where: { id: session.id },
+      data: { password: hashedPassword },
+    })
+
+    return { success: true, message: 'Password updated successfully' }
+  } catch (error) {
+    console.error('Error updating password:', error)
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        error: error.errors[0].message,
+      }
+    }
+    return { success: false, error: 'Failed to update password' }
   }
 }
