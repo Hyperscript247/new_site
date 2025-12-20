@@ -1,8 +1,6 @@
 import type React from "react"
 import { Inter, Geist as Geist_Sans } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
-import Header from "@/components/layout/header"
-import Footer from "@/components/layout/footer"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
@@ -27,11 +25,7 @@ export default function RootLayout({
           enableSystem={true}
           disableTransitionOnChange
       >
-        <div className="flex min-h-screen flex-col">
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </div>
+        {children}
       </ThemeProvider>
       </body>
       </html>
