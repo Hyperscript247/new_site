@@ -11,7 +11,8 @@ export default function CommunitySection() {
   const isInView = useInView(ref, { once: true, amount: 0.3 })
 
   return (
-    <section ref={ref} className="w-full py-24 md:py-32 bg-gradient-to-b from-background via-background/95 to-background/90 relative overflow-hidden">
+      <section id="community" ref={ref}
+               className="w-full py-24 md:py-32 bg-gradient-to-b from-background via-background/95 to-background/90 relative overflow-hidden">
       {/* Dark gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-purple-950/20 via-background to-primary/10" />
 
