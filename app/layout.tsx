@@ -12,22 +12,22 @@ export const metadata = {
 }
 
 export default function RootLayout({
-                                     children,
-                                   }: Readonly<{
+  children,
+}: Readonly<{
   children: React.ReactNode
 }>) {
   return (
-      <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${geist.variable} font-sans`}>
-      <ThemeProvider
+        <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem={true}
           disableTransitionOnChange
-      >
-        {children}
-      </ThemeProvider>
+        >
+          {children}
+        </ThemeProvider>
       </body>
-      </html>
+    </html>
   )
 }
