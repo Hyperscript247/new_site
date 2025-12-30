@@ -2,6 +2,8 @@ import { redirect } from "next/navigation"
 import { getSession } from "@/lib/auth/session"
 import AdminSidebar from "@/components/admin/admin-sidebar"
 
+export const dynamic = 'force-dynamic'
+
 export const metadata = {
   title: "Admin Dashboard | Hyperscript",
   description: "Admin dashboard for managing Hyperscript community and courses",
