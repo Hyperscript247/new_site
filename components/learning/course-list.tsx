@@ -243,7 +243,7 @@ export default function CourseList() {
     }, 300);
 
     return () => clearTimeout(timeoutId);
-  }, [searchQuery, categories]);
+  }, [searchQuery]);
 
   // Filter categories to only show those with courses
   const categoriesWithCourses = categories.filter(category => {

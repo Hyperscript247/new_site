@@ -21,6 +21,7 @@ const navigation = [
 
 export default function Header() {
     const [isScrolled, setIsScrolled] = useState(false)
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
     useEffect(() => {
         const handleScroll = () => {
@@ -67,7 +68,7 @@ export default function Header() {
                         </Button>
                     </div>
                     {/* Sheet trigger - shows at lg breakpoint when nav is hidden */}
-                    <Sheet>
+                    <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
                         <SheetTrigger asChild className="lg:hidden">
                             <Button variant="ghost" size="icon" aria-label="Menu">
                                 <Menu className="h-6 w-6"/>
@@ -75,7 +76,7 @@ export default function Header() {
                         </SheetTrigger>
                         <SheetContent side="right" className="bg-background/95 backdrop-blur-md border-border">
                             <div className="grid gap-6 py-6">
-                                <Link href="/" className="flex items-center space-x-2">
+                                <Link href="/" className="flex items-center space-x-2" onClick={() => setIsMobileMenuOpen(false)}>
                                     <div className="logo-container">
                                         <Image
                                             src="/logo-2.svg"
@@ -93,6 +94,7 @@ export default function Header() {
                                             key={item.name}
                                             href={item.href}
                                             className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                                            onClick={() => setIsMobileMenuOpen(false)}
                                         >
                                             {item.name}
                                         </Link>
@@ -100,7 +102,7 @@ export default function Header() {
                                     <div className="flex items-center justify-between mt-4">
                                         <ThemeToggle/>
                                         <Button asChild className="flex-1 ml-4">
-                                            <Link href="/contact">Get Started</Link>
+                                            <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)}>Get Started</Link>
                                         </Button>
                                     </div>
                                 </div>
