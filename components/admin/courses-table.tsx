@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { createCourse, updateCourse, deleteCourse } from "@/app/actions/admin-actions"
-import { Loader2, Trash2, Edit, Plus } from "lucide-react"
+import { Loader2, Trash2, Edit, Plus, Map } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -334,6 +334,15 @@ export default function CoursesTable({ courses, categories }: CoursesTableProps)
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => router.push(`/admin/courses/${course.id}/roadmap`)}
+                            disabled={isLoading}
+                            title="Manage Roadmap"
+                          >
+                            <Map className="w-4 h-4" />
+                          </Button>
                           <Button
                             variant="outline"
                             size="sm"

@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Search, FolderTree } from "lucide-react"
+import { Search, FolderTree, ArrowRight } from "lucide-react"
+import Link from "next/link"
 import CourseRegistrationForm from "@/components/learning/course-registration-form"
 import { getCategoriesWithCourses, searchCourses } from "@/app/actions/course-actions"
 
@@ -366,10 +367,19 @@ export default function CourseList() {
                         {course.description}
                       </CardDescription>
                     </CardContent>
-                    <CardFooter className="relative z-10 pt-2">
+                    <CardFooter className="relative z-10 pt-2 flex gap-2">
+                      <Link href={`/courses/${course.id}`} className="flex-1">
+                        <Button
+                          variant="ghost"
+                          className="w-full border border-primary/30 hover:border-primary transition-all duration-300"
+                        >
+                          View Details
+                          <ArrowRight className="w-4 h-4 ml-2" />
+                        </Button>
+                      </Link>
                       <Button
                         variant="outline"
-                        className="w-full bg-background hover:bg-primary hover:text-primary-foreground transition-all duration-300 border-primary/30 group-hover:border-primary font-medium"
+                        className="flex-1 bg-background hover:bg-primary hover:text-primary-foreground transition-all duration-300 border-primary/30 group-hover:border-primary font-medium"
                         onClick={() => handleRegisterClick(course)}
                       >
                         Register
@@ -418,10 +428,19 @@ export default function CourseList() {
                           {course.description}
                         </CardDescription>
                       </CardContent>
-                      <CardFooter className="relative z-10 pt-2">
+                      <CardFooter className="relative z-10 pt-2 flex gap-2">
+                        <Link href={`/courses/${course.id}`} className="flex-1">
+                          <Button
+                            variant="ghost"
+                            className="w-full border border-primary/30 hover:border-primary transition-all duration-300"
+                          >
+                            View Details
+                            <ArrowRight className="w-4 h-4 ml-2" />
+                          </Button>
+                        </Link>
                         <Button
                           variant="outline"
-                          className="w-full bg-background hover:bg-primary hover:text-primary-foreground transition-all duration-300 border-primary/30 group-hover:border-primary font-medium"
+                          className="flex-1 bg-background hover:bg-primary hover:text-primary-foreground transition-all duration-300 border-primary/30 group-hover:border-primary font-medium"
                           onClick={() => handleRegisterClick(course)}
                         >
                           Register

@@ -11,7 +11,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-  DialogClose
+  DialogClose,
+  DialogTrigger
 } from "@/components/ui/dialog"
 import {
   Form,
@@ -57,14 +58,20 @@ type CourseProps = {
 
 type CourseRegistrationFormProps = {
   course: CourseProps
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+  trigger?: React.ReactNode
 }
 
-export default function CourseRegistrationForm({ course, open, onOpenChange }: CourseRegistrationFormProps) {
+export default function CourseRegistrationForm({ course, open, onOpenChange, trigger }: CourseRegistrationFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
   const router = useRouter()
+
+  // Use controlled or uncontrolled dialog based on props
+  const dialogOpen = open !== undefined ? open : isOpen
+  const handleOpenChange = onOpenChange || setIsOpen
 
   // Initialize form with default values
   const form = useForm<FormValues>({
@@ -114,7 +121,7 @@ export default function CourseRegistrationForm({ course, open, onOpenChange }: C
         // Close dialog after delay
         setTimeout(() => {
           setShowSuccess(false);
-          onOpenChange(false);
+          handleOpenChange(false);
         }, 5000);
       } else {
         console.error("Registration failed:", result);
@@ -139,7 +146,8 @@ export default function CourseRegistrationForm({ course, open, onOpenChange }: C
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={dialogOpen} onOpenChange={handleOpenChange}>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="sm:max-w-[525px]">
         <DialogHeader>
           <DialogTitle>Register for Course</DialogTitle>
