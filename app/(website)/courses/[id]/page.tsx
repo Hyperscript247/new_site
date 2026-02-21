@@ -35,7 +35,7 @@ export default async function CourseDetailPage({
     <div className="min-h-screen py-12">
       <div className="container px-4 md:px-6 max-w-5xl">
         {/* Back button */}
-        <Link href="/#courses">
+        <Link href="/learning">
           <Button variant="ghost" className="mb-6">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Courses

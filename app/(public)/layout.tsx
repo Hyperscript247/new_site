@@ -2,7 +2,7 @@ import type React from "react"
 import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
 
-export default function WebsiteLayout({
+export default function PublicLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
