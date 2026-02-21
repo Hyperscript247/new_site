@@ -8,6 +8,16 @@ const nextConfig = {
   },
   images: {
     unoptimized: true,
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        pathname: '/**',
+      },
+    ],
+  },
+  serverActions: {
+    bodySizeLimit: '50mb', // Increase limit for image uploads
   },
   // Optimize webpack configuration to prevent chunk loading issues
   webpack: (config, { isServer }) => {

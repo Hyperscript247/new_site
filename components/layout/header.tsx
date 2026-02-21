@@ -6,14 +6,26 @@ import Image from "next/image"
 import {Button} from "@/components/ui/button"
 import {Sheet, SheetContent, SheetTrigger} from "@/components/ui/sheet"
 import {ThemeToggle} from "@/components/ui/theme-toggle"
-import {Menu} from "lucide-react"
+import {Menu, ChevronDown} from "lucide-react"
 import {cn} from "@/lib/utils"
 
-const navigation = [
+type NavigationItem = {
+    name: string
+    href?: string
+    submenu?: Array<{name: string; href: string}>
+}
+
+const navigation: NavigationItem[] = [
     {name: "Home", href: "/"},
     {name: "About Us", href: "/about"},
     {name: "Services", href: "/services"},
-    {name: "Community", href: "/community"},
+    {
+        name: "Community",
+        submenu: [
+            {name: "Join Community", href: "/community"},
+            {name: "Gallery", href: "/gallery"},
+        ]
+    },
     // {name: "Success Stories", href: "/success-stories"},
     {name: "Learning", href: "/learning"},
     {name: "Contact Us", href: "/contact"},
@@ -22,6 +34,7 @@ const navigation = [
 export default function Header() {
     const [isScrolled, setIsScrolled] = useState(false)
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+    const [openDropdown, setOpenDropdown] = useState<string | null>(null)
 
     useEffect(() => {
         const handleScroll = () => {
@@ -30,6 +43,13 @@ export default function Header() {
         window.addEventListener("scroll", handleScroll)
         return () => window.removeEventListener("scroll", handleScroll)
     }, [])
+
+    // Reset dropdown when mobile menu closes
+    useEffect(() => {
+        if (!isMobileMenuOpen) {
+            setOpenDropdown(null)
+        }
+    }, [isMobileMenuOpen])
 
     return (
         <header
@@ -55,9 +75,38 @@ export default function Header() {
                     {/* Navigation - hidden at lg breakpoint (1024px) */}
                     <nav className="hidden lg:flex space-x-10 text-sm text-muted-foreground">
                         {navigation.map((item) => (
-                            <Link key={item.name} href={item.href} className="hover:text-foreground transition-colors">
-                                {item.name}
-                            </Link>
+                            item.submenu ? (
+                                <div
+                                    key={item.name}
+                                    className="relative"
+                                    onMouseEnter={() => setOpenDropdown(item.name)}
+                                    onMouseLeave={() => setOpenDropdown(null)}
+                                >
+                                    <button className="flex items-center gap-1 hover:text-foreground transition-colors">
+                                        {item.name}
+                                        <ChevronDown className="h-3 w-3" />
+                                    </button>
+                                    {openDropdown === item.name && (
+                                        <div className="absolute top-full left-0 pt-2">
+                                            <div className="w-48 bg-background/95 backdrop-blur-md border border-border rounded-lg shadow-lg py-2">
+                                                {item.submenu.map((subitem) => (
+                                                    <Link
+                                                        key={subitem.name}
+                                                        href={subitem.href}
+                                                        className="block px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                                                    >
+                                                        {subitem.name}
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <Link key={item.name} href={item.href!} className="hover:text-foreground transition-colors">
+                                    {item.name}
+                                </Link>
+                            )
                         ))}
                     </nav>
                     {/* Theme toggle and Get Started - visible until sm breakpoint */}
@@ -90,14 +139,46 @@ export default function Header() {
                                 </Link>
                                 <div className="grid gap-4">
                                     {navigation.map((item) => (
-                                        <Link
-                                            key={item.name}
-                                            href={item.href}
-                                            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                                            onClick={() => setIsMobileMenuOpen(false)}
-                                        >
-                                            {item.name}
-                                        </Link>
+                                        item.submenu ? (
+                                            <div key={item.name}>
+                                                <button
+                                                    onClick={() => setOpenDropdown(openDropdown === item.name ? null : item.name)}
+                                                    className="flex items-center justify-between w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
+                                                >
+                                                    {item.name}
+                                                    <ChevronDown className={cn(
+                                                        "h-4 w-4 transition-transform",
+                                                        openDropdown === item.name && "rotate-180"
+                                                    )} />
+                                                </button>
+                                                {openDropdown === item.name && (
+                                                    <div className="ml-4 mt-2 space-y-2">
+                                                        {item.submenu.map((subitem) => (
+                                                            <Link
+                                                                key={subitem.name}
+                                                                href={subitem.href}
+                                                                className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                                                                onClick={() => {
+                                                                    setIsMobileMenuOpen(false)
+                                                                    setOpenDropdown(null)
+                                                                }}
+                                                            >
+                                                                {subitem.name}
+                                                            </Link>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <Link
+                                                key={item.name}
+                                                href={item.href!}
+                                                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                                                onClick={() => setIsMobileMenuOpen(false)}
+                                            >
+                                                {item.name}
+                                            </Link>
+                                        )
                                     ))}
                                     <div className="flex items-center justify-between mt-4">
                                         <ThemeToggle/>

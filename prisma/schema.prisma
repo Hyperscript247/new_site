@@ -74,3 +74,35 @@ model CommunityMember {
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
 }
+
+model Album {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String?
+  coverImage  String?
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  images      Image[]
+}
+
+model Image {
+  id            String   @id @default(cuid())
+  title         String
+  description   String?
+  cloudinaryId  String   @unique
+  url           String
+  thumbnailUrl  String
+  width         Int
+  height        Int
+  format        String
+  size          Int
+  sortOrder     Int      @default(0)
+  albumId       String
+  album         Album    @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([albumId, sortOrder])
+}
