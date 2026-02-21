@@ -38,3 +38,5 @@ prisma/client*
 
 # TypeScript
 *.tsbuildinfo
+
+/docs

@@ -3,7 +3,6 @@
 import type React from "react"
 import { useRef, useState } from "react"
 import { motion, useInView } from "framer-motion"
-import emailjs from "@emailjs/browser"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -28,39 +27,43 @@ export default function ContactForm() {
     setFormState((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsSubmitting(true)
     setSubmitStatus(null)
 
-    emailjs
-      .sendForm(
-        "service_f58sgyf", 
-        "template_pv2id5n", 
-        e.currentTarget, 
-        {
-          publicKey: "0uyq2X_-JcvzHkeFc",
-        }
-      )
-      .then(
-        (result) => {
-          console.log("Email sent successfully:", result.text)
-          setIsSubmitting(false)
-          setIsSubmitted(true)
-          setSubmitStatus('success')
-          setFormState({
-            name: "",
-            email: "",
-            subject: "",
-            message: "",
-          })
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-        (error) => {
-          console.error("Email sending failed:", error.text)
-          setIsSubmitting(false)
-          setSubmitStatus('error')
-        }
-      )
+        body: JSON.stringify(formState),
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        console.log("Email sent successfully")
+        setIsSubmitting(false)
+        setIsSubmitted(true)
+        setSubmitStatus('success')
+        setFormState({
+          name: "",
+          email: "",
+          subject: "",
+          message: "",
+        })
+      } else {
+        console.error("Email sending failed:", data.error)
+        setIsSubmitting(false)
+        setSubmitStatus('error')
+      }
+    } catch (error) {
+      console.error("Email sending failed:", error)
+      setIsSubmitting(false)
+      setSubmitStatus('error')
+    }
   }
 
   return (
