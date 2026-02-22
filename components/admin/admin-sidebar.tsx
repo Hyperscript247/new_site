@@ -17,6 +17,7 @@ import {
   FolderTree,
   UserCog,
   ImageIcon,
+  BookOpen,
 } from "lucide-react"
 import { useState } from "react"
 import PasswordUpdateDialog from "./password-update-dialog"
@@ -25,6 +26,7 @@ const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Community Members", href: "/admin/community", icon: Users },
   { name: "Gallery", href: "/admin/gallery", icon: ImageIcon },
+  { name: "Blog", href: "/admin/blog/posts", icon: BookOpen },
   { name: "Categories", href: "/admin/categories", icon: FolderTree },
   { name: "Courses", href: "/admin/courses", icon: GraduationCap },
   { name: "Registrations", href: "/admin/registrations", icon: FileText },

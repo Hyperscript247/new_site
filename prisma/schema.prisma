@@ -9,13 +9,20 @@ datasource db {
 }
 
 model Category {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  slug      String   @unique
+  id          String       @id @default(cuid())
+  name        String       @unique
+  slug        String       @unique
   description String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  courses   Course[]
+  type        CategoryType @default(COURSE)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  courses     Course[]
+  blogPosts   BlogPost[]
+}
+
+enum CategoryType {
+  COURSE
+  BLOG
 }
 
 model Course {
@@ -48,11 +55,15 @@ model Registration {
 }
 
 model Admin {
-  id        String   @id @default(cuid())
-  username  String   @unique
+  id        String     @id @default(cuid())
+  username  String     @unique
   password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  fullName  String?
+  bio       String?    @db.Text
+  avatar    String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  blogPosts BlogPost[]
 }
 
 model CommunityMember {
@@ -147,4 +158,50 @@ model MilestoneCompletion {
   @@unique([registrationId, milestoneId])
   @@index([registrationId])
   @@index([milestoneId])
+}
+
+model BlogPost {
+  id                    String      @id @default(cuid())
+  title                 String
+  slug                  String      @unique
+  excerpt               String?     @db.Text
+  content               String      @db.Text
+  featuredImageUrl      String?
+  featuredImagePublicId String?
+  featuredImageAlt      String?
+  categoryId            String?
+  category              Category?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  authorId              String?
+  author                Admin?      @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  status                PostStatus  @default(DRAFT)
+  publishedAt           DateTime?
+  scheduledAt           DateTime?
+  viewCount             Int         @default(0)
+  readingTime           Int?
+
+  // SEO fields
+  metaTitle             String?
+  metaDescription       String?     @db.Text
+  keywords              String[]    @default([])
+  ogImage               String?
+
+  // Tags and features
+  tags                  String[]    @default([])
+  isFeatured            Boolean     @default(false)
+  allowComments         Boolean     @default(false)
+
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+
+  @@index([slug])
+  @@index([status, publishedAt(sort: Desc)])
+  @@index([categoryId])
+  @@index([authorId])
+  @@index([isFeatured])
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
 }

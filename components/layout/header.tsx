@@ -28,6 +28,7 @@ const navigation: NavigationItem[] = [
     },
     // {name: "Success Stories", href: "/success-stories"},
     {name: "Learning", href: "/learning"},
+    {name: "Blog", href: "/blog"},
     {name: "Contact Us", href: "/contact"},
 ]
 
