@@ -46,6 +46,7 @@ export async function getCategoriesWithCourses() {
         courses: {
           select: {
             id: true,
+            slug: true,
             title: true,
             description: true,
             categoryId: true,

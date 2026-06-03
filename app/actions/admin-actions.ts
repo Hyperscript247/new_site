@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { requireAuth, hashPassword, verifyPassword, getSession } from '@/lib/auth/session'
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
+import { generateSlug, generateUniqueSlug } from '@/lib/content/slug'
 
 // Community Members Actions
 export async function getCommunityMembers() {
@@ -206,8 +207,14 @@ export async function createCourse(data: FormData) {
 
     const validatedData = courseSchema.parse(rawData)
 
+    // Generate a URL-friendly slug, made unique against existing courses
+    const existingSlugs = (
+      await prisma.course.findMany({ select: { slug: true } })
+    ).map((c) => c.slug)
+    const slug = generateUniqueSlug(generateSlug(validatedData.title), existingSlugs)
+
     const course = await prisma.course.create({
-      data: validatedData,
+      data: { ...validatedData, slug },
     })
 
     revalidatePath('/admin/courses')
@@ -237,12 +244,22 @@ export async function updateCourse(courseId: string, data: FormData) {
 
     const validatedData = courseSchema.parse(rawData)
 
+    // Regenerate slug from the (possibly new) title, unique against other courses
+    const existingSlugs = (
+      await prisma.course.findMany({
+        where: { id: { not: courseId } },
+        select: { slug: true },
+      })
+    ).map((c) => c.slug)
+    const slug = generateUniqueSlug(generateSlug(validatedData.title), existingSlugs)
+
     const course = await prisma.course.update({
       where: { id: courseId },
-      data: validatedData,
+      data: { ...validatedData, slug },
     })
 
     revalidatePath('/admin/courses')
+    revalidatePath('/courses/[slug]', 'page')
     return { success: true, course }
   } catch (error) {
     console.error('Error updating course:', error)

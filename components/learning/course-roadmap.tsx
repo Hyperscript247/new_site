@@ -29,6 +29,7 @@ type CourseRoadmapProps = {
   completedMilestoneIds?: string[]
   registrationId?: string
   isEnrolled?: boolean
+  enrollTrigger?: React.ReactNode
 }
 
 const getMilestoneIcon = (type: string) => {
@@ -66,6 +67,7 @@ export default function CourseRoadmap({
   completedMilestoneIds = [],
   registrationId,
   isEnrolled = false,
+  enrollTrigger,
 }: CourseRoadmapProps) {
   const [expandedMilestone, setExpandedMilestone] = useState<string | null>(null)
 
@@ -199,7 +201,7 @@ export default function CourseRoadmap({
             <p className="text-muted-foreground mb-4">
               Enroll now to track your progress and unlock all course materials
             </p>
-            <Button size="lg">Enroll in Course</Button>
+            {enrollTrigger ?? <Button size="lg">Enroll in Course</Button>}
           </CardContent>
         </Card>
       )}

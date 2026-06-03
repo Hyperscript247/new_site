@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Search, FolderTree, ArrowRight } from "lucide-react"
 import Link from "next/link"
-import CourseRegistrationForm from "@/components/learning/course-registration-form"
 import { getCategoriesWithCourses, searchCourses } from "@/app/actions/course-actions"
 
 // Category type definition
@@ -20,6 +19,7 @@ type Category = {
 // Course type definition (for display)
 type Course = {
   id: string
+  slug: string
   title: string
   description: string
   categoryId: string
@@ -33,6 +33,7 @@ type CategoryWithCourses = {
   slug: string
   courses: {
     id: string
+    slug: string
     title: string
     description: string
     categoryId: string
@@ -91,8 +92,6 @@ const getCategoryIcon = (categoryName: string) => {
 
 export default function CourseList() {
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null)
-  const [showRegistrationForm, setShowRegistrationForm] = useState(false)
   const [courses, setCourses] = useState<Course[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
@@ -257,12 +256,6 @@ export default function CourseList() {
     return categoryData[categoryName] || [];
   }
 
-  // Handle registration button click
-  const handleRegisterClick = (course: Course) => {
-    setSelectedCourse(course)
-    setShowRegistrationForm(true)
-  }
-
   // Handle mouse movement inside cards
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>, courseId: string) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -367,8 +360,8 @@ export default function CourseList() {
                         {course.description}
                       </CardDescription>
                     </CardContent>
-                    <CardFooter className="relative z-10 pt-2 flex gap-2">
-                      <Link href={`/courses/${course.id}`} className="flex-1">
+                    <CardFooter className="relative z-10 pt-2">
+                      <Link href={`/courses/${course.slug}`} className="w-full">
                         <Button
                           variant="ghost"
                           className="w-full border border-primary/30 hover:border-primary transition-all duration-300"
@@ -377,13 +370,6 @@ export default function CourseList() {
                           <ArrowRight className="w-4 h-4 ml-2" />
                         </Button>
                       </Link>
-                      <Button
-                        variant="outline"
-                        className="flex-1 bg-background hover:bg-primary hover:text-primary-foreground transition-all duration-300 border-primary/30 group-hover:border-primary font-medium"
-                        onClick={() => handleRegisterClick(course)}
-                      >
-                        Register
-                      </Button>
                     </CardFooter>
                   </Card>
                 ))}
@@ -428,8 +414,8 @@ export default function CourseList() {
                           {course.description}
                         </CardDescription>
                       </CardContent>
-                      <CardFooter className="relative z-10 pt-2 flex gap-2">
-                        <Link href={`/courses/${course.id}`} className="flex-1">
+                      <CardFooter className="relative z-10 pt-2">
+                        <Link href={`/courses/${course.slug}`} className="w-full">
                           <Button
                             variant="ghost"
                             className="w-full border border-primary/30 hover:border-primary transition-all duration-300"
@@ -438,13 +424,6 @@ export default function CourseList() {
                             <ArrowRight className="w-4 h-4 ml-2" />
                           </Button>
                         </Link>
-                        <Button
-                          variant="outline"
-                          className="flex-1 bg-background hover:bg-primary hover:text-primary-foreground transition-all duration-300 border-primary/30 group-hover:border-primary font-medium"
-                          onClick={() => handleRegisterClick(course)}
-                        >
-                          Register
-                        </Button>
                       </CardFooter>
                     </Card>
                   ))}
@@ -457,15 +436,6 @@ export default function CourseList() {
               </TabsContent>
             ))}
           </Tabs>
-        )}
-
-        {/* Registration Form Dialog */}
-        {selectedCourse && (
-          <CourseRegistrationForm
-            course={selectedCourse}
-            open={showRegistrationForm}
-            onOpenChange={setShowRegistrationForm}
-          />
         )}
       </div>
     </section>

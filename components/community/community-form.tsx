@@ -117,7 +117,7 @@ export default function CommunityForm() {
   }
 
   return (
-    <section ref={ref} className="w-full py-20 md:py-32 bg-background">
+    <section id="join" ref={ref} className="w-full py-20 md:py-32 bg-background scroll-mt-24">
       <div className="container px-6 mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

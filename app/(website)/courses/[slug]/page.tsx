@@ -14,12 +14,12 @@ export const dynamic = 'force-dynamic'
 export default async function CourseDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>
+  params: Promise<{ slug: string }>
 }) {
-  const { id } = await params
+  const { slug } = await params
 
   const course = await prisma.course.findUnique({
-    where: { id },
+    where: { slug },
     include: {
       category: true,
     },
@@ -29,7 +29,7 @@ export default async function CourseDetailPage({
     notFound()
   }
 
-  const { roadmap } = await getCourseRoadmap(id)
+  const { roadmap } = await getCourseRoadmap(course.id)
 
   return (
     <div className="min-h-screen py-12">
@@ -75,6 +75,11 @@ export default async function CourseDetailPage({
             <CourseRoadmap
               milestones={roadmap.milestones}
               isEnrolled={false}
+              enrollTrigger={
+                <CourseRegistrationForm course={course} trigger={
+                  <Button size="lg">Enroll in Course</Button>
+                } />
+              }
             />
           </div>
         ) : (

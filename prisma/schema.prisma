@@ -28,6 +28,7 @@ enum CategoryType {
 model Course {
   id            String          @id @default(cuid())
   title         String
+  slug          String          @unique
   description   String
   categoryId    String
   category      Category        @relation(fields: [categoryId], references: [id])

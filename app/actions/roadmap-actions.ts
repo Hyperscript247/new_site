@@ -45,7 +45,7 @@ export async function createRoadmap(courseId: string, description?: string) {
 
     console.log('[createRoadmap] Roadmap created successfully:', roadmap.id)
     revalidatePath(`/admin/courses/${courseId}/roadmap`)
-    revalidatePath(`/courses/${courseId}`)
+    revalidatePath('/courses/[slug]', 'page')
     return { roadmap, success: true }
   } catch (error) {
     console.error('[createRoadmap] Error creating roadmap:', error)

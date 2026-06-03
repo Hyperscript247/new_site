@@ -87,6 +87,7 @@ async function main() {
       create: {
         id: 'course-web-dev',
         title: 'Full Stack Web Development',
+        slug: 'full-stack-web-development',
         description: 'Learn modern web development with React, Node.js, and PostgreSQL. Build real-world applications from scratch.',
         categoryId: webDevCategory.id,
       },
@@ -97,6 +98,7 @@ async function main() {
       create: {
         id: 'course-data-science',
         title: 'Data Science with Python',
+        slug: 'data-science-with-python',
         description: 'Master data analysis, visualization, and machine learning using Python and popular libraries.',
         categoryId: dataScienceCategory.id,
       },
@@ -107,6 +109,7 @@ async function main() {
       create: {
         id: 'course-cloud',
         title: 'Cloud Computing Fundamentals',
+        slug: 'cloud-computing-fundamentals',
         description: 'Learn cloud architecture, deployment, and management with AWS, Azure, and Google Cloud.',
         categoryId: cloudCategory.id,
       },

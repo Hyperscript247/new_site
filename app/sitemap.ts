@@ -33,11 +33,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Get all courses
   const courses = await prisma.course.findMany({
-    select: { id: true, updatedAt: true },
+    select: { slug: true, updatedAt: true },
   })
 
   const courseUrls = courses.map((course) => ({
-    url: `${baseUrl}/courses/${course.id}`,
+    url: `${baseUrl}/courses/${course.slug}`,
     lastModified: course.updatedAt,
     changeFrequency: 'monthly' as const,
     priority: 0.8,
