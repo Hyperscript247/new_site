@@ -68,11 +68,14 @@ export async function submitCommunityRegistration(data: FormData) {
       },
     });
 
-    // Send welcome email
+    // Send welcome email + admin notification via ZeptoMail
     try {
       await sendCommunityWelcomeEmail({
         to: validatedData.email,
         name: validatedData.fullName,
+        phone: validatedData.phone,
+        profession: validatedData.profession,
+        membershipId: member.id,
       });
     } catch (emailError) {
       console.error('Failed to send welcome email:', emailError);

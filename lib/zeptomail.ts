@@ -1,9 +1,20 @@
 /**
- * ZeptoMail Email Service
+ * ZeptoMail Low-Level Client
  *
- * Handles all email sending via ZeptoMail REST API
- * Documentation: https://www.zoho.com/zeptomail/help/api/
+ * Provides the raw `sendEmail` function used by API routes that need full
+ * control over the email payload (e.g. custom from/reply-to per request).
+ *
+ * For server actions and most application code, prefer the higher-level
+ * helpers in `lib/email.ts` instead.
+ *
+ * @see https://www.npmjs.com/package/zeptomail
  */
+
+import { SendMailClient } from 'zeptomail';
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
 
 interface EmailAddress {
   address: string;
@@ -28,61 +39,56 @@ interface SendEmailParams {
   attachments?: EmailAttachment[];
 }
 
-interface ZeptoMailAPIPayload {
-  from: {
-    address: string;
-    name?: string;
-  };
-  to: Array<{
-    email_address: {
-      address: string;
-      name?: string;
-    };
-  }>;
-  subject: string;
-  htmlbody: string;
-  textbody?: string;
-  reply_to?: {
-    address: string;
-    name?: string;
-  };
-  cc?: Array<{
-    email_address: {
-      address: string;
-      name?: string;
-    };
-  }>;
-  bcc?: Array<{
-    email_address: {
-      address: string;
-      name?: string;
-    };
-  }>;
-  attachments?: EmailAttachment[];
+// ---------------------------------------------------------------------------
+// Client singleton
+// ---------------------------------------------------------------------------
+
+let _client: InstanceType<typeof SendMailClient> | null = null;
+
+function getClient(): InstanceType<typeof SendMailClient> {
+  if (_client) return _client;
+
+  const url = process.env.ZEPTOMAIL_API_URL || 'https://api.zeptomail.com/v1.1/email';
+  const token = process.env.ZEPTOMAIL_API_KEY;
+
+  if (!token) {
+    throw new Error('[ZEPTOMAIL] API key not configured');
+  }
+
+  _client = new SendMailClient({ url, token });
+  return _client;
 }
 
-/**
- * Transform email addresses to ZeptoMail API format
- */
-function transformToZeptoMailFormat(addresses: EmailAddress[]): Array<{ email_address: { address: string; name?: string } }> {
-  return addresses.map(addr => {
-    const emailAddress: { address: string; name?: string } = {
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/** Transform flat EmailAddress[] → ZeptoMail's nested recipient shape */
+function transformToZeptoMailFormat(
+  addresses: EmailAddress[],
+): Array<{ email_address: { address: string; name: string } }> {
+  return addresses.map((addr) => ({
+    email_address: {
       address: addr.address,
-    };
-    // Only include name if it's present
-    if (addr.name) {
-      emailAddress.name = addr.name;
-    }
-    return { email_address: emailAddress };
-  });
+      name: addr.name || addr.address, // SDK requires name as string
+    },
+  }));
 }
 
+// ---------------------------------------------------------------------------
+// Core send
+// ---------------------------------------------------------------------------
+
 /**
- * Send email via ZeptoMail REST API
+ * Send an email via the ZeptoMail SDK.
+ *
+ * This is the low-level function consumed by API routes that assemble their
+ * own payloads. For typed, template-aware helpers see `lib/email.ts`.
  */
-export async function sendEmail(params: SendEmailParams): Promise<{ success: boolean; data?: any; error?: string }> {
+export async function sendEmail(
+  params: SendEmailParams,
+): Promise<{ success: boolean; data?: unknown; error?: string }> {
   const apiKey = process.env.ZEPTOMAIL_API_KEY;
-  const apiUrl = process.env.ZEPTOMAIL_API_URL || 'https://api.zeptomail.com/v1.1/email';
 
   if (!apiKey) {
     console.error('[ZEPTOMAIL] API key not configured');
@@ -90,26 +96,26 @@ export async function sendEmail(params: SendEmailParams): Promise<{ success: boo
   }
 
   try {
-    // Transform to ZeptoMail API format
-    const payload: ZeptoMailAPIPayload = {
+    const client = getClient();
+
+    const payload: Record<string, unknown> = {
       from: {
         address: params.from.address,
-        name: params.from.name || 'Hyperscript', // Ensure name is always present
+        name: params.from.name || 'Hyperscript',
       },
       to: transformToZeptoMailFormat(params.to),
       subject: params.subject,
       htmlbody: params.htmlbody,
     };
 
-    // Add optional fields
     if (params.textbody) {
       payload.textbody = params.textbody;
     }
     if (params.reply_to) {
-      payload.reply_to = {
+      payload.reply_to = [{
         address: params.reply_to.address,
-        name: params.reply_to.name,
-      };
+        name: params.reply_to.name || params.reply_to.address,
+      }];
     }
     if (params.cc && params.cc.length > 0) {
       payload.cc = transformToZeptoMailFormat(params.cc);
@@ -121,60 +127,44 @@ export async function sendEmail(params: SendEmailParams): Promise<{ success: boo
       payload.attachments = params.attachments;
     }
 
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': apiKey,
-      },
-      body: JSON.stringify(payload),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error('[ZEPTOMAIL] API Error:', data);
-      return { success: false, error: data.error?.message || data.message || 'Failed to send email' };
-    }
-
-    console.log('[ZEPTOMAIL] Email sent successfully:', data.message || 'Email sent');
+    const data = await client.sendMail(payload);
+    console.log('[ZEPTOMAIL] Email sent successfully:', data?.message || 'OK');
     return { success: true, data };
   } catch (error) {
     console.error('[ZEPTOMAIL] Error sending email:', error);
-    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
   }
 }
 
-/**
- * Get default sender email address
- */
+// ---------------------------------------------------------------------------
+// Config accessors (unchanged API surface)
+// ---------------------------------------------------------------------------
+
+/** Get default sender email address */
 export function getDefaultSender(): EmailAddress {
   return {
-    address: process.env.EMAIL_FROM_ADDRESS || 'noreply@hyperscript.com',
-    name: process.env.EMAIL_FROM_NAME || 'Hyperscript',
+    address: process.env.ZEPTOMAIL_FROM_EMAIL || 'noreply@hyperscript.ng',
+    name: process.env.ZEPTOMAIL_FROM_NAME || 'Hyperscript',
   };
 }
 
-/**
- * Get reply-to email address
- */
+/** Get reply-to email address */
 export function getReplyToAddress(): EmailAddress {
   return {
-    address: process.env.EMAIL_REPLY_TO || 'info@hyperscript.com',
-    name: process.env.EMAIL_FROM_NAME || 'Hyperscript',
+    address: process.env.EMAIL_REPLY_TO || 'info@hyperscript.ng',
+    name: process.env.ZEPTOMAIL_FROM_NAME || 'Hyperscript',
   };
 }
 
-/**
- * Get admin email address
- */
+/** Get admin email address */
 export function getAdminEmail(): string {
-  return process.env.ADMIN_EMAIL || 'admin@hyperscript.com';
+  return process.env.ADMIN_EMAIL || 'admin@hyperscript.ng';
 }
 
-/**
- * Get community email address
- */
+/** Get community email address */
 export function getCommunityEmail(): string {
-  return process.env.COMMUNITY_EMAIL || 'community@hyperscript.com';
+  return process.env.COMMUNITY_EMAIL || 'community@hyperscript.ng';
 }
